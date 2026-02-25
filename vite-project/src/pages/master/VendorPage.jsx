@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { masterApi } from '../../api/masterApi';
+import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/PageHeader';
 import DataTable from '../../components/DataTable';
 import ConfirmModal from '../../components/ConfirmModal';
 
 function VendorModal({ vendor, onSave, onClose }) {
-    const [form, setForm] = useState(vendor || { vendorName: '', contactName: '', phone: '', email: '', address: '' });
+    const [form, setForm] = useState(vendor || { vendorName: '', contactPerson: '', phone: '', email: '', address: '' });
     const [loading, setLoading] = useState(false);
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
     const handleSubmit = async (e) => {
@@ -21,7 +22,7 @@ function VendorModal({ vendor, onSave, onClose }) {
             <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
                 <h3 className="text-lg font-semibold mb-4">{vendor?.vendorId ? 'Sửa nhà cung cấp' : 'Thêm nhà cung cấp'}</h3>
                 <form onSubmit={handleSubmit} className="space-y-3">
-                    {[['vendorName', 'Tên NCC *', true], ['contactName', 'Người liên hệ', false], ['phone', 'Điện thoại', false], ['email', 'Email', false], ['address', 'Địa chỉ', false]].map(([name, label, req]) => (
+                    {[['vendorName', 'Tên NCC *', true], ['contactPerson', 'Người liên hệ', false], ['phone', 'Điện thoại', false], ['email', 'Email', false], ['address', 'Địa chỉ', false]].map(([name, label, req]) => (
                         <div key={name}>
                             <label className="label">{label}</label>
                             <input name={name} value={form[name] || ''} onChange={handleChange} className="input" required={req} />
@@ -38,6 +39,7 @@ function VendorModal({ vendor, onSave, onClose }) {
 }
 
 export default function VendorPage() {
+    const { isManager } = useAuth();
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(0);
@@ -70,10 +72,10 @@ export default function VendorPage() {
 
     const columns = [
         { key: 'vendorName', label: 'Tên nhà cung cấp' },
-        { key: 'contactName', label: 'Người liên hệ', width: '150px' },
+        { key: 'contactPerson', label: 'Người liên hệ', width: '150px' },
         { key: 'phone', label: 'SĐT', width: '120px' },
         { key: 'email', label: 'Email', width: '180px' },
-        {
+        ...(isManager() ? [{
             key: 'action', label: '', width: '100px',
             render: (_, row) => (
                 <div className="flex gap-2">
@@ -81,13 +83,13 @@ export default function VendorPage() {
                     <button onClick={() => setDeleteTarget(row)} className="text-red-500 text-xs font-medium">Xóa</button>
                 </div>
             ),
-        },
+        }] : []),
     ];
 
     return (
         <div>
             <PageHeader title="Nhà cung cấp" subtitle={`${totalElements} nhà cung cấp`}>
-                <button onClick={() => setModal('create')} className="btn-primary">+ Thêm</button>
+                {isManager() && <button onClick={() => setModal('create')} className="btn-primary">+ Thêm</button>}
             </PageHeader>
             <div className="card"><div className="card-body p-0">
                 <DataTable columns={columns} data={data} loading={loading}

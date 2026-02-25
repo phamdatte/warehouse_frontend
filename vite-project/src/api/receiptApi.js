@@ -6,4 +6,5 @@ export const receiptApi = {
     create: (data) => api.post('/api/receipts', data),
     update: (id, data) => api.put(`/api/receipts/${id}`, data),
     approve: (id) => api.put(`/api/receipts/${id}/approve`),
+    cancel: (id) => api.put(`/api/receipts/${id}/cancel`),
 };

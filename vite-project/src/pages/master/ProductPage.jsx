@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { masterApi } from '../../api/masterApi';
+import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/PageHeader';
 import DataTable from '../../components/DataTable';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -76,6 +77,7 @@ function ProductModal({ product, categories, onSave, onClose }) {
 }
 
 export default function ProductPage() {
+    const { isManager } = useAuth();
     const [data, setData] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -123,7 +125,7 @@ export default function ProductPage() {
             key: 'unitPrice', label: 'Đơn giá', width: '120px',
             render: (v) => v ? `${Number(v).toLocaleString('vi-VN')}₫` : '—'
         },
-        {
+        ...(isManager() ? [{
             key: 'action', label: '', width: '100px',
             render: (_, row) => (
                 <div className="flex gap-2">
@@ -131,13 +133,13 @@ export default function ProductPage() {
                     <button onClick={() => setDeleteTarget(row)} className="text-red-500 hover:text-red-700 text-xs font-medium">Xóa</button>
                 </div>
             ),
-        },
+        }] : []),
     ];
 
     return (
         <div>
             <PageHeader title="Quản lý sản phẩm" subtitle={`${totalElements} sản phẩm`}>
-                <button onClick={() => setModal('create')} className="btn-primary">+ Thêm sản phẩm</button>
+                {isManager() && <button onClick={() => setModal('create')} className="btn-primary">+ Thêm sản phẩm</button>}
             </PageHeader>
             <div className="card">
                 <div className="card-body p-0">

@@ -13,11 +13,13 @@ import MainLayout from './layouts/MainLayout';
 import ReceiptListPage from './pages/receipt/ReceiptListPage';
 import ReceiptCreatePage from './pages/receipt/ReceiptCreatePage';
 import ReceiptDetailPage from './pages/receipt/ReceiptDetailPage';
+import ReceiptEditPage from './pages/receipt/ReceiptEditPage';
 
 // Issue
 import IssueListPage from './pages/issue/IssueListPage';
 import IssueCreatePage from './pages/issue/IssueCreatePage';
 import IssueDetailPage from './pages/issue/IssueDetailPage';
+import IssueEditPage from './pages/issue/IssueEditPage';
 
 // Inventory
 import InventoryPage from './pages/inventory/InventoryPage';
@@ -54,11 +56,13 @@ export default function App() {
               <Route path="receipt" element={<ReceiptListPage />} />
               <Route path="receipt/create" element={<ReceiptCreatePage />} />
               <Route path="receipt/:id" element={<ReceiptDetailPage />} />
+              <Route path="receipt/:id/edit" element={<ReceiptEditPage />} />
 
               {/* Goods Issue */}
               <Route path="issue" element={<IssueListPage />} />
               <Route path="issue/create" element={<IssueCreatePage />} />
               <Route path="issue/:id" element={<IssueDetailPage />} />
+              <Route path="issue/:id/edit" element={<IssueEditPage />} />
 
               {/* Inventory */}
               <Route path="inventory" element={<InventoryPage />} />

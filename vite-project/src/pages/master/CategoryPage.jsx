@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { masterApi } from '../../api/masterApi';
+import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/PageHeader';
 import DataTable from '../../components/DataTable';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -83,6 +84,7 @@ function useCrud({ getAll, create, update, delete: del, idKey, getFields }) {
 
 // ---- CategoryPage ----
 export function CategoryPage() {
+    const { isManager } = useAuth();
     const FIELDS = [
         { name: 'categoryName', label: 'Tên danh mục', required: true },
         { name: 'description', label: 'Mô tả' },
@@ -94,7 +96,7 @@ export function CategoryPage() {
     const columns = [
         { key: 'categoryName', label: 'Tên danh mục' },
         { key: 'description', label: 'Mô tả' },
-        {
+        ...(isManager() ? [{
             key: 'action', label: '', width: '100px',
             render: (_, row) => (
                 <div className="flex gap-2">
@@ -102,12 +104,12 @@ export function CategoryPage() {
                     <button onClick={() => crud.setDeleteTarget(row)} className="text-red-500 text-xs font-medium">Xóa</button>
                 </div>
             ),
-        },
+        }] : []),
     ];
     return (
         <div>
             <PageHeader title="Danh mục sản phẩm" subtitle={`${crud.totalElements} danh mục`}>
-                <button onClick={() => crud.setModal('create')} className="btn-primary">+ Thêm</button>
+                {isManager() && <button onClick={() => crud.setModal('create')} className="btn-primary">+ Thêm</button>}
             </PageHeader>
             <div className="card">
                 <div className="card-body p-0">

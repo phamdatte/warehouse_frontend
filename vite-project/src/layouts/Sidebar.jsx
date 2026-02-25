@@ -37,7 +37,9 @@ export default function Sidebar() {
     const { pages, user } = useAuth();
 
     // Nhóm pages theo page_group, chỉ lấy is_menu=true
-    const menuItems = pages.filter((p) => p.isMenu !== false);
+    // Ẩn các mục "duyệt" riêng lẻ vì chức năng đã tích hợp vào trang chi tiết
+    const HIDDEN_URLS = ['/receipt/approve', '/issue/approve'];
+    const menuItems = pages.filter((p) => p.isMenu !== false && !HIDDEN_URLS.includes(p.pageUrl));
     const groups = menuItems.reduce((acc, p) => {
         const g = p.pageGroup || 'other';
         if (!acc[g]) acc[g] = [];
