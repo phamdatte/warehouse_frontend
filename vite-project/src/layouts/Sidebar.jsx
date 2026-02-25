@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-// Map page_group → icon emoji (Heroicons cần cài, dùng emoji fallback)
 const GROUP_ICONS = {
     dashboard: '🏠',
     receipt: '📥',
@@ -10,6 +9,34 @@ const GROUP_ICONS = {
     report: '📊',
     master: '⚙️',
     admin: '👤',
+};
+
+const GROUP_NAMES = {
+    dashboard: 'Dashboard',
+    receipt: 'Goods Receipt',
+    issue: 'Goods Issue',
+    inventory: 'Inventory',
+    report: 'Reports',
+    master: 'Master Data',
+    admin: 'System Admin',
+};
+
+const PAGE_NAMES = {
+    '/dashboard': 'Dashboard',
+    '/receipt': 'Receipt List',
+    '/receipt/create': 'Create Receipt',
+    '/issue': 'Issue List',
+    '/issue/create': 'Create Issue',
+    '/inventory': 'Current Inventory',
+    '/inventory/history': 'Transaction History',
+    '/report/receipt': 'Receipt Report',
+    '/report/issue': 'Issue Report',
+    '/report/inventory': 'Inventory Report',
+    '/product': 'Products',
+    '/category': 'Categories',
+    '/vendor': 'Vendors',
+    '/customer': 'Customers',
+    '/admin/user': 'Users',
 };
 
 // Map page_url → route path trong React Router
@@ -65,7 +92,7 @@ export default function Sidebar() {
                 {Object.entries(groups).map(([group, items]) => (
                     <div key={group} className="mb-4">
                         <div className="text-slate-500 text-xs font-semibold uppercase tracking-wider px-3 mb-1">
-                            {GROUP_ICONS[group] || '•'} {group}
+                            {GROUP_ICONS[group] || '•'} {GROUP_NAMES[group] || group}
                         </div>
                         {items.map((page) => {
                             const to = URL_MAP[page.pageUrl] || page.pageUrl;
@@ -82,7 +109,7 @@ export default function Sidebar() {
                                     }
                                 >
                                     <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60 flex-shrink-0" />
-                                    {page.pageName}
+                                    {PAGE_NAMES[page.pageUrl] || page.pageName}
                                 </NavLink>
                             );
                         })}
