@@ -18,16 +18,16 @@ export default function LoginPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.username || !form.password) {
-            setError('Vui lòng nhập tên đăng nhập và mật khẩu');
+            setError('Please enter your username and password');
             return;
         }
         setLoading(true);
         try {
             await login(form.username, form.password);
-            toast.success('Đăng nhập thành công!');
+            toast.success('Login successful!');
             navigate('/', { replace: true });
         } catch (err) {
-            const msg = err.response?.data?.error || err.response?.data?.message || 'Sai tên đăng nhập hoặc mật khẩu';
+            const msg = err.response?.data?.error || err.response?.data?.message || 'Invalid username or password';
             setError(msg);
         } finally {
             setLoading(false);
@@ -46,16 +46,16 @@ export default function LoginPage() {
                         </svg>
                     </div>
                     <h1 className="text-2xl font-bold text-white">Warehouse Manager</h1>
-                    <p className="text-slate-400 text-sm mt-1">Hệ thống quản lý kho</p>
+                    <p className="text-slate-400 text-sm mt-1">Inventory Management System</p>
                 </div>
 
                 {/* Card */}
                 <div className="bg-white rounded-2xl shadow-2xl p-8">
-                    <h2 className="text-xl font-semibold text-slate-800 mb-6">Đăng nhập</h2>
+                    <h2 className="text-xl font-semibold text-slate-800 mb-6">Sign In</h2>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="label">Tên đăng nhập</label>
+                            <label className="label">Username</label>
                             <input
                                 type="text"
                                 name="username"
@@ -67,7 +67,7 @@ export default function LoginPage() {
                             />
                         </div>
                         <div>
-                            <label className="label">Mật khẩu</label>
+                            <label className="label">Password</label>
                             <input
                                 type="password"
                                 name="password"
@@ -95,14 +95,14 @@ export default function LoginPage() {
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                                     </svg>
-                                    Đang đăng nhập...
+                                    Signing in...
                                 </>
-                            ) : 'Đăng nhập'}
+                            ) : 'Sign In'}
                         </button>
                     </form>
 
                     <p className="text-xs text-slate-400 text-center mt-6">
-                        Mật khẩu mặc định: <span className="font-mono">123456</span>
+                        Default password: <span className="font-mono">123456</span>
                     </p>
                 </div>
             </div>

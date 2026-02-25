@@ -32,7 +32,7 @@ export default function ReceiptListPage() {
             setTotalElements(res.data.totalElements || 0);
             setPage(p);
         } catch {
-            toast.error('Không thể tải danh sách phiếu nhập');
+            toast.error('Failed to load receipt list');
         } finally {
             setLoading(false);
         }
@@ -45,17 +45,17 @@ export default function ReceiptListPage() {
     };
 
     const columns = [
-        { key: 'receiptNumber', label: 'Số phiếu', width: '130px' },
-        { key: 'vendorName', label: 'Nhà cung cấp' },
+        { key: 'receiptNumber', label: 'Receipt No.', width: '130px' },
+        { key: 'vendorName', label: 'Vendor' },
         {
-            key: 'receiptDate', label: 'Ngày nhập', width: '150px',
-            render: (v) => v ? new Date(v).toLocaleDateString('vi-VN') : '—'
+            key: 'receiptDate', label: 'Date', width: '150px',
+            render: (v) => v ? new Date(v).toLocaleDateString('en-US') : '—'
         },
         {
-            key: 'status', label: 'Trạng thái', width: '120px',
+            key: 'status', label: 'Status', width: '120px',
             render: (v) => <StatusBadge status={v} />
         },
-        { key: 'createdByName', label: 'Người tạo', width: '130px' },
+        { key: 'createdByName', label: 'Created By', width: '130px' },
         {
             key: 'action', label: '', width: '80px',
             render: (_, row) => (
@@ -63,7 +63,7 @@ export default function ReceiptListPage() {
                     onClick={() => navigate(`/receipt/${row.receiptId}`)}
                     className="text-primary-500 hover:text-primary-700 text-xs font-medium"
                 >
-                    Xem
+                    View
                 </button>
             ),
         },
@@ -71,9 +71,9 @@ export default function ReceiptListPage() {
 
     return (
         <div>
-            <PageHeader title="Phiếu nhập kho" subtitle="Quản lý nhập hàng từ nhà cung cấp">
+            <PageHeader title="Goods Receipts" subtitle="Manage incoming stock from vendors">
                 <button onClick={() => navigate('/receipt/create')} className="btn-primary">
-                    + Tạo phiếu nhập
+                    + Create Receipt
                 </button>
             </PageHeader>
 
@@ -82,23 +82,23 @@ export default function ReceiptListPage() {
                 <div className="card-body py-4">
                     <div className="flex flex-wrap gap-3 items-end">
                         <div>
-                            <label className="label">Trạng thái</label>
+                            <label className="label">Status</label>
                             <select name="status" value={filters.status} onChange={handleFilterChange} className="input w-40">
                                 {STATUS_OPTIONS.map((s) => (
-                                    <option key={s} value={s}>{s || 'Tất cả'}</option>
+                                    <option key={s} value={s}>{s || 'All'}</option>
                                 ))}
                             </select>
                         </div>
                         <div>
-                            <label className="label">Từ ngày</label>
+                            <label className="label">From Date</label>
                             <input type="date" name="fromDate" value={filters.fromDate} onChange={handleFilterChange} className="input w-40" />
                         </div>
                         <div>
-                            <label className="label">Đến ngày</label>
+                            <label className="label">To Date</label>
                             <input type="date" name="toDate" value={filters.toDate} onChange={handleFilterChange} className="input w-40" />
                         </div>
-                        <button onClick={() => fetch(0)} className="btn-primary btn-sm h-9">Tìm kiếm</button>
-                        <button onClick={() => setFilters({ status: '', fromDate: '', toDate: '' })} className="btn-secondary btn-sm h-9">Xóa filter</button>
+                        <button onClick={() => fetch(0)} className="btn-primary btn-sm h-9">Search</button>
+                        <button onClick={() => setFilters({ status: '', fromDate: '', toDate: '' })} className="btn-secondary btn-sm h-9">Clear</button>
                     </div>
                 </div>
             </div>

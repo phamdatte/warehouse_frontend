@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
-export default function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, confirmLabel = 'Xác nhận', confirmClass = 'btn-danger' }) {
+export default function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, confirmLabel = 'Confirm', confirmClass = 'btn-danger' }) {
     useEffect(() => {
         if (isOpen) document.body.style.overflow = 'hidden';
         else document.body.style.overflow = '';
@@ -22,7 +22,7 @@ export default function ConfirmModal({ isOpen, title, message, onConfirm, onCanc
                 <h3 className="text-lg font-semibold text-slate-800 mb-2">{title}</h3>
                 <p className="text-sm text-slate-600 mb-6">{message}</p>
                 <div className="flex justify-end gap-3">
-                    <button onClick={onCancel} className="btn-secondary">Hủy</button>
+                    <button onClick={onCancel} className="btn-secondary">Cancel</button>
                     <button onClick={onConfirm} className={confirmClass}>{confirmLabel}</button>
                 </div>
             </div>

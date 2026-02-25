@@ -27,7 +27,7 @@ export default function ReceiptCreatePage() {
         ]).then(([v, p]) => {
             setVendors(v.data.content || []);
             setProducts(p.data.content || []);
-        }).catch(() => toast.error('Không thể tải dữ liệu'));
+        }).catch(() => toast.error('Failed to load data'));
     }, []);
 
     const handleFormChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -35,7 +35,6 @@ export default function ReceiptCreatePage() {
     const handleItemChange = (index, field, value) => {
         const newItems = [...items];
         newItems[index] = { ...newItems[index], [field]: value };
-        // Auto-fill unitPrice from product
         if (field === 'productId') {
             const prod = products.find((p) => String(p.productId) === value);
             if (prod) newItems[index].unitPrice = prod.unitPrice;
@@ -52,9 +51,9 @@ export default function ReceiptCreatePage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.vendorId) { toast.warning('Vui lòng chọn nhà cung cấp'); return; }
+        if (!form.vendorId) { toast.warning('Please select a vendor'); return; }
         if (items.some((it) => !it.productId || !it.quantity || !it.unitPrice)) {
-            toast.warning('Vui lòng điền đầy đủ thông tin sản phẩm'); return;
+            toast.warning('Please fill in all product details'); return;
         }
         setLoading(true);
         try {
@@ -68,10 +67,10 @@ export default function ReceiptCreatePage() {
                     unitPrice: Number(it.unitPrice),
                 })),
             });
-            toast.success('Tạo phiếu nhập thành công!');
+            toast.success('Receipt created successfully!');
             navigate('/receipt');
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Tạo phiếu thất bại');
+            toast.error(err.response?.data?.message || 'Failed to create receipt');
         } finally {
             setLoading(false);
         }
@@ -79,33 +78,33 @@ export default function ReceiptCreatePage() {
 
     return (
         <div>
-            <PageHeader title="Tạo phiếu nhập kho" subtitle="Thêm hàng từ nhà cung cấp vào kho">
-                <button onClick={() => navigate('/receipt')} className="btn-secondary">← Quay lại</button>
+            <PageHeader title="Create Goods Receipt" subtitle="Add incoming stock from vendor">
+                <button onClick={() => navigate('/receipt')} className="btn-secondary">← Back</button>
             </PageHeader>
 
             <form onSubmit={handleSubmit}>
                 {/* Header info */}
                 <div className="card mb-6">
                     <div className="card-header">
-                        <h3 className="font-semibold text-slate-700">Thông tin chung</h3>
+                        <h3 className="font-semibold text-slate-700">General Information</h3>
                     </div>
                     <div className="card-body grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label className="label">Nhà cung cấp *</label>
+                            <label className="label">Vendor *</label>
                             <select name="vendorId" value={form.vendorId} onChange={handleFormChange} className="input" required>
-                                <option value="">-- Chọn nhà cung cấp --</option>
+                                <option value="">-- Select vendor --</option>
                                 {vendors.map((v) => (
                                     <option key={v.vendorId} value={v.vendorId}>{v.vendorName}</option>
                                 ))}
                             </select>
                         </div>
                         <div>
-                            <label className="label">Ngày nhập *</label>
+                            <label className="label">Receipt Date *</label>
                             <input type="datetime-local" name="receiptDate" value={form.receiptDate} onChange={handleFormChange} className="input" required />
                         </div>
                         <div>
-                            <label className="label">Ghi chú</label>
-                            <input type="text" name="notes" value={form.notes} onChange={handleFormChange} className="input" placeholder="Nhập ghi chú..." />
+                            <label className="label">Notes</label>
+                            <input type="text" name="notes" value={form.notes} onChange={handleFormChange} className="input" placeholder="Enter notes..." />
                         </div>
                     </div>
                 </div>
@@ -113,9 +112,9 @@ export default function ReceiptCreatePage() {
                 {/* Items */}
                 <div className="card mb-6">
                     <div className="card-header">
-                        <h3 className="font-semibold text-slate-700">Danh sách sản phẩm</h3>
+                        <h3 className="font-semibold text-slate-700">Product List</h3>
                         <button type="button" onClick={addItem} className="btn-secondary btn-sm">
-                            <PlusIcon className="w-4 h-4" /> Thêm SP
+                            <PlusIcon className="w-4 h-4" /> Add Item
                         </button>
                     </div>
                     <div className="card-body p-0">
@@ -123,10 +122,10 @@ export default function ReceiptCreatePage() {
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Sản phẩm</th>
-                                    <th className="w-32">Số lượng</th>
-                                    <th className="w-40">Đơn giá (VND)</th>
-                                    <th className="w-40 text-right">Thành tiền</th>
+                                    <th>Product</th>
+                                    <th className="w-32">Qty</th>
+                                    <th className="w-40">Unit Price (VND)</th>
+                                    <th className="w-40 text-right">Subtotal</th>
                                     <th className="w-12"></th>
                                 </tr>
                             </thead>
@@ -138,7 +137,7 @@ export default function ReceiptCreatePage() {
                                             <td className="text-slate-400">{i + 1}</td>
                                             <td>
                                                 <select value={it.productId} onChange={(e) => handleItemChange(i, 'productId', e.target.value)} className="input" required>
-                                                    <option value="">-- Chọn SP --</option>
+                                                    <option value="">-- Select product --</option>
                                                     {products.map((p) => (
                                                         <option key={p.productId} value={p.productId}>{p.productName} ({p.unit})</option>
                                                     ))}
@@ -155,7 +154,7 @@ export default function ReceiptCreatePage() {
                                                     className="input" placeholder="0" required />
                                             </td>
                                             <td className="text-right font-medium text-slate-700">
-                                                {sub.toLocaleString('vi-VN')}₫
+                                                {sub.toLocaleString('en-US')}₫
                                             </td>
                                             <td>
                                                 {items.length > 1 && (
@@ -170,9 +169,9 @@ export default function ReceiptCreatePage() {
                             </tbody>
                             <tfoot>
                                 <tr className="border-t-2 border-slate-200 bg-slate-50">
-                                    <td colSpan={4} className="px-4 py-3 text-right font-semibold text-slate-700">Tổng cộng:</td>
+                                    <td colSpan={4} className="px-4 py-3 text-right font-semibold text-slate-700">Total:</td>
                                     <td className="px-4 py-3 text-right font-bold text-primary-600 text-base">
-                                        {totalAmount.toLocaleString('vi-VN')}₫
+                                        {totalAmount.toLocaleString('en-US')}₫
                                     </td>
                                     <td />
                                 </tr>
@@ -182,9 +181,9 @@ export default function ReceiptCreatePage() {
                 </div>
 
                 <div className="flex justify-end gap-3">
-                    <button type="button" onClick={() => navigate('/receipt')} className="btn-secondary">Hủy</button>
+                    <button type="button" onClick={() => navigate('/receipt')} className="btn-secondary">Cancel</button>
                     <button type="submit" disabled={loading} className="btn-primary">
-                        {loading ? 'Đang lưu...' : 'Tạo phiếu nhập'}
+                        {loading ? 'Saving...' : 'Create Receipt'}
                     </button>
                 </div>
             </form>

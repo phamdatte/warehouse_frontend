@@ -18,37 +18,35 @@ export default function ReceiptDetailPage() {
     const fetchReceipt = () => {
         receiptApi.getById(id)
             .then((res) => setReceipt(res.data))
-            .catch(() => toast.error('Không tìm thấy phiếu nhập'))
+            .catch(() => toast.error('Receipt not found'))
             .finally(() => setLoading(false));
     };
 
-    useEffect(() => {
-        fetchReceipt();
-    }, [id]);
+    useEffect(() => { fetchReceipt(); }, [id]);
 
     const handleApprove = async () => {
-        if (!window.confirm('Bạn có chắc muốn duyệt phiếu nhập này không?')) return;
+        if (!window.confirm('Are you sure you want to approve this receipt?')) return;
         setApproving(true);
         try {
             await receiptApi.approve(id);
-            toast.success('Duyệt phiếu nhập thành công!');
+            toast.success('Receipt approved successfully!');
             fetchReceipt();
         } catch (err) {
-            toast.error(err?.response?.data?.message || 'Duyệt phiếu thất bại');
+            toast.error(err?.response?.data?.message || 'Failed to approve receipt');
         } finally {
             setApproving(false);
         }
     };
 
     const handleCancel = async () => {
-        if (!window.confirm('Bạn có chắc muốn hủy phiếu nhập này không?')) return;
+        if (!window.confirm('Are you sure you want to cancel this receipt?')) return;
         setCancelling(true);
         try {
             await receiptApi.cancel(id);
-            toast.success('Hủy phiếu nhập thành công!');
+            toast.success('Receipt cancelled successfully!');
             fetchReceipt();
         } catch (err) {
-            toast.error(err?.response?.data?.message || 'Hủy phiếu thất bại');
+            toast.error(err?.response?.data?.message || 'Failed to cancel receipt');
         } finally {
             setCancelling(false);
         }
@@ -59,7 +57,7 @@ export default function ReceiptDetailPage() {
             <div className="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full" />
         </div>
     );
-    if (!receipt) return <div className="text-center text-slate-400 py-20">Không tìm thấy phiếu</div>;
+    if (!receipt) return <div className="text-center text-slate-400 py-20">Receipt not found</div>;
 
     const totalAmount = receipt.items?.reduce((s, it) => s + Number(it.subtotal || 0), 0) || 0;
     const isPending = receipt.status === 'Pending';
@@ -67,13 +65,13 @@ export default function ReceiptDetailPage() {
     return (
         <div>
             <PageHeader
-                title={`Phiếu nhập: ${receipt.receiptNumber}`}
-                subtitle={`Ngày tạo: ${receipt.createdAt ? new Date(receipt.createdAt).toLocaleString('vi-VN') : '—'}`}
+                title={`Receipt: ${receipt.receiptNumber}`}
+                subtitle={`Created: ${receipt.createdAt ? new Date(receipt.createdAt).toLocaleString('en-US') : '—'}`}
             >
-                <button onClick={() => navigate('/receipt')} className="btn-secondary">← Quay lại</button>
+                <button onClick={() => navigate('/receipt')} className="btn-secondary">← Back</button>
                 {isPending && (
                     <button onClick={() => navigate(`/receipt/${id}/edit`)} className="btn-secondary">
-                        ✏️ Sửa phiếu
+                        ✏️ Edit
                     </button>
                 )}
                 {isPending && isManager() && (
@@ -82,7 +80,7 @@ export default function ReceiptDetailPage() {
                         disabled={approving}
                         className="btn-primary"
                     >
-                        {approving ? 'Đang duyệt...' : '✅ Duyệt phiếu'}
+                        {approving ? 'Approving...' : '✅ Approve'}
                     </button>
                 )}
                 {isPending && (
@@ -91,7 +89,7 @@ export default function ReceiptDetailPage() {
                         disabled={cancelling}
                         className="btn-danger"
                     >
-                        {cancelling ? 'Đang hủy...' : '🚫 Hủy phiếu'}
+                        {cancelling ? 'Cancelling...' : '🚫 Cancel'}
                     </button>
                 )}
             </PageHeader>
@@ -99,29 +97,29 @@ export default function ReceiptDetailPage() {
             {/* Info cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="card card-body">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Nhà cung cấp</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Vendor</div>
                     <div className="font-semibold text-slate-800">{receipt.vendorName || '—'}</div>
                 </div>
                 <div className="card card-body">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Ngày nhập</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Receipt Date</div>
                     <div className="font-semibold text-slate-800">
-                        {receipt.receiptDate ? new Date(receipt.receiptDate).toLocaleString('vi-VN') : '—'}
+                        {receipt.receiptDate ? new Date(receipt.receiptDate).toLocaleString('en-US') : '—'}
                     </div>
                 </div>
                 <div className="card card-body">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Trạng thái</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Status</div>
                     <StatusBadge status={receipt.status} />
                 </div>
                 <div className="card card-body">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Người tạo</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Created By</div>
                     <div className="font-semibold">{receipt.createdByName || '—'}</div>
                 </div>
                 <div className="card card-body">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Người duyệt</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Approved By</div>
                     <div className="font-semibold">{receipt.approvedByName || '—'}</div>
                 </div>
                 <div className="card card-body">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Ghi chú</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Notes</div>
                     <div className="text-slate-600 text-sm">{receipt.notes || '—'}</div>
                 </div>
             </div>
@@ -129,19 +127,19 @@ export default function ReceiptDetailPage() {
             {/* Items table */}
             <div className="card mb-6">
                 <div className="card-header">
-                    <h3 className="font-semibold text-slate-700">Chi tiết sản phẩm</h3>
-                    <span className="text-sm text-slate-500">{receipt.items?.length || 0} mặt hàng</span>
+                    <h3 className="font-semibold text-slate-700">Product Details</h3>
+                    <span className="text-sm text-slate-500">{receipt.items?.length || 0} items</span>
                 </div>
                 <div className="card-body p-0">
                     <table className="table">
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Sản phẩm</th>
-                                <th>Đơn vị</th>
-                                <th className="text-right">Số lượng</th>
-                                <th className="text-right">Đơn giá</th>
-                                <th className="text-right">Thành tiền</th>
+                                <th>Product</th>
+                                <th>Unit</th>
+                                <th className="text-right">Qty</th>
+                                <th className="text-right">Unit Price</th>
+                                <th className="text-right">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -153,19 +151,19 @@ export default function ReceiptDetailPage() {
                                         <div className="text-xs text-slate-400">{it.productCode}</div>
                                     </td>
                                     <td className="text-slate-500">{it.unit}</td>
-                                    <td className="text-right">{Number(it.quantity).toLocaleString('vi-VN')}</td>
-                                    <td className="text-right">{Number(it.unitPrice).toLocaleString('vi-VN')}₫</td>
+                                    <td className="text-right">{Number(it.quantity).toLocaleString('en-US')}</td>
+                                    <td className="text-right">{Number(it.unitPrice).toLocaleString('en-US')}₫</td>
                                     <td className="text-right font-semibold text-primary-600">
-                                        {Number(it.subtotal).toLocaleString('vi-VN')}₫
+                                        {Number(it.subtotal).toLocaleString('en-US')}₫
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                         <tfoot>
                             <tr className="border-t-2 border-slate-200 bg-slate-50">
-                                <td colSpan={5} className="px-4 py-3 text-right font-bold text-slate-700">Tổng cộng:</td>
+                                <td colSpan={5} className="px-4 py-3 text-right font-bold text-slate-700">Total:</td>
                                 <td className="px-4 py-3 text-right font-bold text-primary-700 text-lg">
-                                    {totalAmount.toLocaleString('vi-VN')}₫
+                                    {totalAmount.toLocaleString('en-US')}₫
                                 </td>
                             </tr>
                         </tfoot>

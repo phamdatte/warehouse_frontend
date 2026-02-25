@@ -8,7 +8,7 @@ export default function Header() {
 
     const handleLogout = () => {
         logout();
-        toast.info('Đã đăng xuất');
+        toast.info('Logged out');
         navigate('/login', { replace: true });
     };
 
@@ -26,7 +26,7 @@ export default function Header() {
                     onClick={handleLogout}
                     className="btn-secondary btn-sm text-red-600 border-red-200 hover:bg-red-50"
                 >
-                    Đăng xuất
+                    Log out
                 </button>
             </div>
         </header>

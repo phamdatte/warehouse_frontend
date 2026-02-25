@@ -16,7 +16,7 @@ function Skeleton({ rows = 5, cols = 4 }) {
     );
 }
 
-export default function DataTable({ columns, data, loading, pagination, onPageChange, emptyMessage = 'Không có dữ liệu' }) {
+export default function DataTable({ columns, data, loading, pagination, onPageChange, emptyMessage = 'No data' }) {
     const { page = 0, totalPages = 0, totalElements = 0 } = pagination || {};
 
     return (
@@ -57,7 +57,7 @@ export default function DataTable({ columns, data, loading, pagination, onPageCh
             {/* Pagination */}
             {pagination && totalPages > 1 && (
                 <div className="flex items-center justify-between mt-4 text-sm text-slate-500">
-                    <span>Tổng {totalElements} bản ghi</span>
+                    <span>Total {totalElements} records</span>
                     <div className="flex items-center gap-1">
                         <button
                             onClick={() => onPageChange(page - 1)}
