@@ -30,7 +30,7 @@ export default function InventoryPage() {
             setTotalElements(res.data.totalElements || 0);
             setPage(p);
         } catch {
-            toast.error('Không thể tải dữ liệu tồn kho');
+            toast.error('Failed to load inventory data');
         } finally {
             setLoading(false);
         }
@@ -43,43 +43,43 @@ export default function InventoryPage() {
     const lowStockCount = data.filter((r) => r.currentQuantity <= 10).length;
 
     const columns = [
-        { key: 'productCode', label: 'Mã SP', width: '100px' },
-        { key: 'productName', label: 'Tên sản phẩm' },
-        { key: 'categoryName', label: 'Danh mục', width: '140px' },
-        { key: 'unit', label: 'ĐVT', width: '80px' },
+        { key: 'productCode', label: 'Product Code', width: '100px' },
+        { key: 'productName', label: 'Product Name' },
+        { key: 'categoryName', label: 'Category', width: '140px' },
+        { key: 'unit', label: 'Unit', width: '80px' },
         {
-            key: 'currentQuantity', label: 'Tồn kho', width: '110px',
+            key: 'currentQuantity', label: 'In Stock', width: '110px',
             render: (v) => {
                 const isLow = v <= 10;
                 return (
                     <span className={`font-semibold text-sm ${isLow ? 'text-red-600' : 'text-green-700'}`}>
-                        {v?.toLocaleString('vi-VN')} {isLow && <span className="text-xs font-normal ml-1">⚠️</span>}
+                        {v?.toLocaleString('en-US')} {isLow && <span className="text-xs font-normal ml-1">⚠️</span>}
                     </span>
                 );
             },
         },
         {
-            key: 'lastUpdated', label: 'Cập nhật lần cuối', width: '150px',
-            render: (v) => v ? new Date(v).toLocaleDateString('vi-VN') : '—'
+            key: 'lastUpdated', label: 'Last Updated', width: '150px',
+            render: (v) => v ? new Date(v).toLocaleDateString('en-US') : '—'
         },
     ];
 
     return (
         <div>
-            <PageHeader title="Tồn kho hiện tại" subtitle={`${totalElements} sản phẩm đang quản lý`} />
+            <PageHeader title="Current Inventory" subtitle={`Managing ${totalElements} products`} />
 
             {/* Summary cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="card card-body">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Tổng sản phẩm</div>
-                    <div className="text-2xl font-bold text-slate-800">{totalElements.toLocaleString('vi-VN')}</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Total Products</div>
+                    <div className="text-2xl font-bold text-slate-800">{totalElements.toLocaleString('en-US')}</div>
                 </div>
                 <div className="card card-body">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Tổng tồn kho (trang này)</div>
-                    <div className="text-2xl font-bold text-primary-600">{totalStock.toLocaleString('vi-VN')}</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Total Stock (this page)</div>
+                    <div className="text-2xl font-bold text-primary-600">{totalStock.toLocaleString('en-US')}</div>
                 </div>
                 <div className="card card-body">
-                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Sắp hết hàng (≤10)</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Low Stock (≤10)</div>
                     <div className={`text-2xl font-bold ${lowStockCount > 0 ? 'text-red-600' : 'text-green-600'}`}>
                         {lowStockCount}
                     </div>
@@ -91,20 +91,20 @@ export default function InventoryPage() {
                 <div className="card-body py-4">
                     <div className="flex flex-wrap gap-3 items-end">
                         <div>
-                            <label className="label">Tìm kiếm</label>
-                            <input type="text" value={filters.search} placeholder="Tên sản phẩm, mã SP..."
+                            <label className="label">Search</label>
+                            <input type="text" value={filters.search} placeholder="Product name, code..."
                                 onChange={(e) => setFilters({ ...filters, search: e.target.value })} className="input w-52" />
                         </div>
                         <div>
-                            <label className="label">Danh mục</label>
+                            <label className="label">Category</label>
                             <select value={filters.categoryId}
                                 onChange={(e) => setFilters({ ...filters, categoryId: e.target.value })} className="input w-44">
-                                <option value="">Tất cả</option>
+                                <option value="">All</option>
                                 {categories.map((c) => <option key={c.categoryId} value={c.categoryId}>{c.categoryName}</option>)}
                             </select>
                         </div>
-                        <button onClick={() => fetch(0)} className="btn-primary btn-sm h-9">Tìm kiếm</button>
-                        <button onClick={() => setFilters({ categoryId: '', search: '' })} className="btn-secondary btn-sm h-9">Xóa filter</button>
+                        <button onClick={() => fetch(0)} className="btn-primary btn-sm h-9">Search</button>
+                        <button onClick={() => setFilters({ categoryId: '', search: '' })} className="btn-secondary btn-sm h-9">Clear filter</button>
                     </div>
                 </div>
             </div>

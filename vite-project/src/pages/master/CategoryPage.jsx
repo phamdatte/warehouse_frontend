@@ -28,8 +28,8 @@ function SimpleModal({ title, fields, data, onSave, onClose }) {
                         </div>
                     ))}
                     <div className="flex justify-end gap-3 pt-2">
-                        <button type="button" onClick={onClose} className="btn-secondary">Hủy</button>
-                        <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Đang lưu...' : 'Lưu'}</button>
+                        <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+                        <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Saving...' : 'Save'}</button>
                     </div>
                 </form>
             </div>
@@ -54,7 +54,7 @@ function useCrud({ getAll, create, update, delete: del, idKey, getFields }) {
             setTotalPages(res.data.totalPages || 0);
             setTotalElements(res.data.totalElements || 0);
             setPage(p);
-        } catch { toast.error('Không thể tải dữ liệu'); }
+        } catch { toast.error('Failed to load data'); }
         finally { setLoading(false); }
     }, [getAll]);
 
@@ -64,19 +64,19 @@ function useCrud({ getAll, create, update, delete: del, idKey, getFields }) {
         try {
             if (modal !== 'create') await update(modal[idKey], form);
             else await create(form);
-            toast.success('Lưu thành công!');
+            toast.success('Saved successfully!');
             setModal(null);
             fetch(page);
-        } catch (err) { toast.error(err.response?.data?.message || 'Lưu thất bại'); }
+        } catch (err) { toast.error(err.response?.data?.message || 'Failed to save'); }
     };
 
     const handleDelete = async () => {
         try {
             await del(deleteTarget[idKey]);
-            toast.success('Xóa thành công!');
+            toast.success('Deleted successfully!');
             setDeleteTarget(null);
             fetch(page);
-        } catch (err) { toast.error(err.response?.data?.message || 'Xóa thất bại'); }
+        } catch (err) { toast.error(err.response?.data?.message || 'Failed to delete'); }
     };
 
     return { data, loading, page, totalPages, totalElements, fetch, modal, setModal, deleteTarget, setDeleteTarget, handleSave, handleDelete };
@@ -86,30 +86,30 @@ function useCrud({ getAll, create, update, delete: del, idKey, getFields }) {
 export function CategoryPage() {
     const { isManager } = useAuth();
     const FIELDS = [
-        { name: 'categoryName', label: 'Tên danh mục', required: true },
-        { name: 'description', label: 'Mô tả' },
+        { name: 'categoryName', label: 'Category Name', required: true },
+        { name: 'description', label: 'Description' },
     ];
     const crud = useCrud({
         getAll: masterApi.getCategories, create: masterApi.createCategory,
         update: masterApi.updateCategory, delete: masterApi.deleteCategory, idKey: 'categoryId',
     });
     const columns = [
-        { key: 'categoryName', label: 'Tên danh mục' },
-        { key: 'description', label: 'Mô tả' },
+        { key: 'categoryName', label: 'Category Name' },
+        { key: 'description', label: 'Description' },
         ...(isManager() ? [{
             key: 'action', label: '', width: '100px',
             render: (_, row) => (
                 <div className="flex gap-2">
-                    <button onClick={() => crud.setModal(row)} className="text-primary-500 text-xs font-medium">Sửa</button>
-                    <button onClick={() => crud.setDeleteTarget(row)} className="text-red-500 text-xs font-medium">Xóa</button>
+                    <button onClick={() => crud.setModal(row)} className="text-primary-500 text-xs font-medium">Edit</button>
+                    <button onClick={() => crud.setDeleteTarget(row)} className="text-red-500 text-xs font-medium">Delete</button>
                 </div>
             ),
         }] : []),
     ];
     return (
         <div>
-            <PageHeader title="Danh mục sản phẩm" subtitle={`${crud.totalElements} danh mục`}>
-                {isManager() && <button onClick={() => crud.setModal('create')} className="btn-primary">+ Thêm</button>}
+            <PageHeader title="Product Categories" subtitle={`${crud.totalElements} categories`}>
+                {isManager() && <button onClick={() => crud.setModal('create')} className="btn-primary">+ Add</button>}
             </PageHeader>
             <div className="card">
                 <div className="card-body p-0">
@@ -117,8 +117,8 @@ export function CategoryPage() {
                         pagination={{ page: crud.page, totalPages: crud.totalPages, totalElements: crud.totalElements }} onPageChange={crud.fetch} />
                 </div>
             </div>
-            {crud.modal && <SimpleModal title={crud.modal === 'create' ? 'Thêm danh mục' : 'Sửa danh mục'} fields={FIELDS} data={crud.modal !== 'create' ? crud.modal : null} onSave={crud.handleSave} onClose={() => crud.setModal(null)} />}
-            <ConfirmModal isOpen={!!crud.deleteTarget} title="Xóa danh mục" message={`Xóa danh mục "${crud.deleteTarget?.categoryName}"?`} onConfirm={crud.handleDelete} onCancel={() => crud.setDeleteTarget(null)} />
+            {crud.modal && <SimpleModal title={crud.modal === 'create' ? 'Add Category' : 'Edit Category'} fields={FIELDS} data={crud.modal !== 'create' ? crud.modal : null} onSave={crud.handleSave} onClose={() => crud.setModal(null)} />}
+            <ConfirmModal isOpen={!!crud.deleteTarget} title="Delete category" message={`Are you sure you want to delete category "${crud.deleteTarget?.categoryName}"?`} onConfirm={crud.handleDelete} onCancel={() => crud.setDeleteTarget(null)} />
         </div>
     );
 }

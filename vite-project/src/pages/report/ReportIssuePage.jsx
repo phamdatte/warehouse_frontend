@@ -25,7 +25,7 @@ export default function ReportIssuePage() {
             setTotalElements(res.data.totalElements || 0);
             setPage(p);
         } catch {
-            toast.error('Không thể tải báo cáo xuất kho');
+            toast.error('Failed to load issue report');
         } finally {
             setLoading(false);
         }
@@ -34,38 +34,38 @@ export default function ReportIssuePage() {
     useEffect(() => { fetch(0); }, [fetch]);
 
     const columns = [
-        { key: 'issueNumber', label: 'Số phiếu', width: '130px' },
-        { key: 'customerName', label: 'Khách hàng' },
+        { key: 'issueNumber', label: 'Issue No.', width: '130px' },
+        { key: 'customerName', label: 'Customer' },
         {
-            key: 'issueDate', label: 'Ngày xuất', width: '140px',
-            render: (v) => v ? new Date(v).toLocaleDateString('vi-VN') : '—'
+            key: 'issueDate', label: 'Issue Date', width: '140px',
+            render: (v) => v ? new Date(v).toLocaleDateString('en-US') : '—'
         },
-        { key: 'status', label: 'Trạng thái', width: '120px', render: (v) => <StatusBadge status={v} /> },
+        { key: 'status', label: 'Status', width: '120px', render: (v) => <StatusBadge status={v} /> },
         {
-            key: 'totalAmount', label: 'Tổng tiền', width: '140px',
-            render: (v) => v ? `${v.toLocaleString('vi-VN')}₫` : '—'
+            key: 'totalAmount', label: 'Total Amount', width: '140px',
+            render: (v) => v ? `${v.toLocaleString('en-US')}₫` : '—'
         },
-        { key: 'approvedByName', label: 'Người duyệt', width: '130px' },
+        { key: 'approvedByName', label: 'Approved By', width: '130px' },
     ];
 
     return (
         <div>
-            <PageHeader title="Báo cáo xuất kho" subtitle={`${totalElements} phiếu đã duyệt`} />
+            <PageHeader title="Goods Issue Report" subtitle={`${totalElements} approved issues`} />
             <div className="card mb-4">
                 <div className="card-body py-4">
                     <div className="flex flex-wrap gap-3 items-end">
                         <div>
-                            <label className="label">Từ ngày</label>
+                            <label className="label">From Date</label>
                             <input type="date" value={filters.fromDate}
                                 onChange={(e) => setFilters({ ...filters, fromDate: e.target.value })} className="input w-40" />
                         </div>
                         <div>
-                            <label className="label">Đến ngày</label>
+                            <label className="label">To Date</label>
                             <input type="date" value={filters.toDate}
                                 onChange={(e) => setFilters({ ...filters, toDate: e.target.value })} className="input w-40" />
                         </div>
-                        <button onClick={() => fetch(0)} className="btn-primary btn-sm h-9">Xem báo cáo</button>
-                        <button onClick={() => setFilters({ fromDate: '', toDate: '' })} className="btn-secondary btn-sm h-9">Xóa filter</button>
+                        <button onClick={() => fetch(0)} className="btn-primary btn-sm h-9">View Report</button>
+                        <button onClick={() => setFilters({ fromDate: '', toDate: '' })} className="btn-secondary btn-sm h-9">Clear filter</button>
                     </div>
                 </div>
             </div>

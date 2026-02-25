@@ -30,7 +30,7 @@ export default function IssueListPage() {
             setTotalElements(res.data.totalElements || 0);
             setPage(p);
         } catch {
-            toast.error('Không thể tải danh sách phiếu xuất');
+            toast.error('Failed to load issue list');
         } finally {
             setLoading(false);
         }
@@ -39,54 +39,54 @@ export default function IssueListPage() {
     useEffect(() => { fetch(0); }, [fetch]);
 
     const columns = [
-        { key: 'issueNumber', label: 'Số phiếu', width: '130px' },
-        { key: 'customerName', label: 'Khách hàng' },
+        { key: 'issueNumber', label: 'Issue No.', width: '130px' },
+        { key: 'customerName', label: 'Customer' },
         {
-            key: 'issueDate', label: 'Ngày xuất', width: '150px',
-            render: (v) => v ? new Date(v).toLocaleDateString('vi-VN') : '—'
+            key: 'issueDate', label: 'Issue Date', width: '150px',
+            render: (v) => v ? new Date(v).toLocaleDateString('en-US') : '—'
         },
         {
-            key: 'status', label: 'Trạng thái', width: '120px',
+            key: 'status', label: 'Status', width: '120px',
             render: (v) => <StatusBadge status={v} />
         },
-        { key: 'createdByName', label: 'Người tạo', width: '130px' },
+        { key: 'createdByName', label: 'Created By', width: '130px' },
         {
             key: 'action', label: '', width: '80px',
             render: (_, row) => (
                 <button onClick={() => navigate(`/issue/${row.issueId}`)}
-                    className="text-primary-500 hover:text-primary-700 text-xs font-medium">Xem</button>
+                    className="text-primary-500 hover:text-primary-700 text-xs font-medium">View</button>
             ),
         },
     ];
 
     return (
         <div>
-            <PageHeader title="Phiếu xuất kho" subtitle="Quản lý xuất hàng cho khách hàng">
-                <button onClick={() => navigate('/issue/create')} className="btn-primary">+ Tạo phiếu xuất</button>
+            <PageHeader title="Goods Issues" subtitle="Manage goods issued to customers">
+                <button onClick={() => navigate('/issue/create')} className="btn-primary">+ Create Issue</button>
             </PageHeader>
 
             <div className="card mb-6">
                 <div className="card-body py-4">
                     <div className="flex flex-wrap gap-3 items-end">
                         <div>
-                            <label className="label">Trạng thái</label>
+                            <label className="label">Status</label>
                             <select name="status" value={filters.status}
                                 onChange={(e) => setFilters({ ...filters, status: e.target.value })} className="input w-40">
-                                {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s || 'Tất cả'}</option>)}
+                                {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s || 'All'}</option>)}
                             </select>
                         </div>
                         <div>
-                            <label className="label">Từ ngày</label>
+                            <label className="label">From Date</label>
                             <input type="date" value={filters.fromDate}
                                 onChange={(e) => setFilters({ ...filters, fromDate: e.target.value })} className="input w-40" />
                         </div>
                         <div>
-                            <label className="label">Đến ngày</label>
+                            <label className="label">To Date</label>
                             <input type="date" value={filters.toDate}
                                 onChange={(e) => setFilters({ ...filters, toDate: e.target.value })} className="input w-40" />
                         </div>
-                        <button onClick={() => fetch(0)} className="btn-primary btn-sm h-9">Tìm kiếm</button>
-                        <button onClick={() => setFilters({ status: '', fromDate: '', toDate: '' })} className="btn-secondary btn-sm h-9">Xóa filter</button>
+                        <button onClick={() => fetch(0)} className="btn-primary btn-sm h-9">Search</button>
+                        <button onClick={() => setFilters({ status: '', fromDate: '', toDate: '' })} className="btn-secondary btn-sm h-9">Clear filter</button>
                     </div>
                 </div>
             </div>

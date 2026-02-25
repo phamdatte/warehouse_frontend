@@ -28,7 +28,7 @@ export default function TransactionHistoryPage() {
             setTotalElements(res.data.totalElements || 0);
             setPage(p);
         } catch {
-            toast.error('Không thể tải lịch sử giao dịch');
+            toast.error('Failed to load transaction history');
         } finally {
             setLoading(false);
         }
@@ -38,56 +38,56 @@ export default function TransactionHistoryPage() {
 
     const columns = [
         {
-            key: 'transactionDate', label: 'Ngày GD', width: '150px',
-            render: (v) => v ? new Date(v).toLocaleString('vi-VN') : '—',
+            key: 'transactionDate', label: 'Transaction Date', width: '150px',
+            render: (v) => v ? new Date(v).toLocaleString('en-US') : '—',
         },
-        { key: 'productName', label: 'Sản phẩm' },
+        { key: 'productName', label: 'Product' },
         {
-            key: 'transactionType', label: 'Loại', width: '90px',
+            key: 'transactionType', label: 'Type', width: '90px',
             render: (v) => (
                 <span className={`badge ${v === 'Receipt' ? 'badge-approved' : 'badge-cancelled'}`}>
-                    {v === 'Receipt' ? '📥 Nhập' : '📤 Xuất'}
+                    {v === 'Receipt' ? '📥 Receipt' : '📤 Issue'}
                 </span>
             ),
         },
         {
-            key: 'quantity', label: 'Số lượng', width: '100px',
+            key: 'quantity', label: 'Qty', width: '100px',
             render: (v, row) => (
                 <span className={`font-semibold ${row.transactionType === 'Receipt' ? 'text-green-600' : 'text-red-600'}`}>
-                    {row.transactionType === 'Receipt' ? '+' : '-'}{v?.toLocaleString('vi-VN')}
+                    {row.transactionType === 'Receipt' ? '+' : '-'}{v?.toLocaleString('en-US')}
                 </span>
             ),
         },
-        { key: 'referenceNumber', label: 'Số phiếu', width: '130px' },
-        { key: 'performedBy', label: 'Người thực hiện', width: '130px' },
+        { key: 'referenceNumber', label: 'Ref No.', width: '130px' },
+        { key: 'performedBy', label: 'Performed By', width: '130px' },
     ];
 
     return (
         <div>
-            <PageHeader title="Lịch sử giao dịch" subtitle={`${totalElements} giao dịch`} />
+            <PageHeader title="Transaction History" subtitle={`${totalElements} transactions`} />
 
             <div className="card mb-4">
                 <div className="card-body py-4">
                     <div className="flex flex-wrap gap-3 items-end">
                         <div>
-                            <label className="label">Loại giao dịch</label>
+                            <label className="label">Transaction Type</label>
                             <select value={filters.type}
                                 onChange={(e) => setFilters({ ...filters, type: e.target.value })} className="input w-36">
-                                {TYPE_OPTIONS.map((t) => <option key={t} value={t}>{t || 'Tất cả'}</option>)}
+                                {TYPE_OPTIONS.map((t) => <option key={t} value={t}>{t || 'All'}</option>)}
                             </select>
                         </div>
                         <div>
-                            <label className="label">Từ ngày</label>
+                            <label className="label">From Date</label>
                             <input type="date" value={filters.fromDate}
                                 onChange={(e) => setFilters({ ...filters, fromDate: e.target.value })} className="input w-40" />
                         </div>
                         <div>
-                            <label className="label">Đến ngày</label>
+                            <label className="label">To Date</label>
                             <input type="date" value={filters.toDate}
                                 onChange={(e) => setFilters({ ...filters, toDate: e.target.value })} className="input w-40" />
                         </div>
-                        <button onClick={() => fetch(0)} className="btn-primary btn-sm h-9">Tìm kiếm</button>
-                        <button onClick={() => setFilters({ type: '', fromDate: '', toDate: '', productId: '' })} className="btn-secondary btn-sm h-9">Xóa filter</button>
+                        <button onClick={() => fetch(0)} className="btn-primary btn-sm h-9">Search</button>
+                        <button onClick={() => setFilters({ type: '', fromDate: '', toDate: '', productId: '' })} className="btn-secondary btn-sm h-9">Clear filter</button>
                     </div>
                 </div>
             </div>

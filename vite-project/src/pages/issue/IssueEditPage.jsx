@@ -32,7 +32,7 @@ export default function IssueEditPage() {
             setInventory(inv.data.content || []);
             const issue = gi.data;
             if (issue.status !== 'Pending') {
-                toast.error('Chỉ có thể sửa phiếu ở trạng thái Pending');
+                toast.error('Only Pending issues can be edited');
                 navigate(`/issue/${id}`);
                 return;
             }
@@ -47,7 +47,7 @@ export default function IssueEditPage() {
                 unitPrice: String(it.unitPrice),
                 availableStock: null,
             })) || [{ ...emptyItem }]);
-        }).catch(() => toast.error('Không thể tải dữ liệu'))
+        }).catch(() => toast.error('Failed to load data'))
             .finally(() => setInitialLoading(false));
     }, [id]);
 
@@ -76,7 +76,7 @@ export default function IssueEditPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (items.some((it) => !it.productId || !it.quantity || !it.unitPrice)) {
-            toast.warning('Vui lòng điền đầy đủ thông tin sản phẩm'); return;
+            toast.warning('Please fill in all product details'); return;
         }
         setLoading(true);
         try {
@@ -90,10 +90,10 @@ export default function IssueEditPage() {
                     unitPrice: Number(it.unitPrice),
                 })),
             });
-            toast.success('Cập nhật phiếu xuất thành công!');
+            toast.success('Issue updated successfully!');
             navigate(`/issue/${id}`);
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Cập nhật thất bại');
+            toast.error(err.response?.data?.message || 'Update failed');
         } finally {
             setLoading(false);
         }
@@ -107,40 +107,40 @@ export default function IssueEditPage() {
 
     return (
         <div>
-            <PageHeader title="Sửa phiếu xuất kho" subtitle="Chỉnh sửa thông tin phiếu xuất (chỉ khi Pending)">
-                <button onClick={() => navigate(`/issue/${id}`)} className="btn-secondary">← Quay lại</button>
+            <PageHeader title="Edit Goods Issue" subtitle="Edit issue information (only when Pending)">
+                <button onClick={() => navigate(`/issue/${id}`)} className="btn-secondary">← Back</button>
             </PageHeader>
 
             <form onSubmit={handleSubmit}>
                 <div className="card mb-6">
-                    <div className="card-header"><h3 className="font-semibold text-slate-700">Thông tin chung</h3></div>
+                    <div className="card-header"><h3 className="font-semibold text-slate-700">General Information</h3></div>
                     <div className="card-body grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label className="label">Khách hàng</label>
+                            <label className="label">Customer</label>
                             <select value={form.customerId}
                                 onChange={(e) => setForm({ ...form, customerId: e.target.value })} className="input">
-                                <option value="">-- Chọn khách hàng --</option>
+                                <option value="">-- Select customer --</option>
                                 {customers.map((c) => <option key={c.customerId} value={c.customerId}>{c.customerName}</option>)}
                             </select>
                         </div>
                         <div>
-                            <label className="label">Ngày xuất *</label>
+                            <label className="label">Issue Date *</label>
                             <input type="datetime-local" value={form.issueDate}
                                 onChange={(e) => setForm({ ...form, issueDate: e.target.value })} className="input" required />
                         </div>
                         <div>
-                            <label className="label">Ghi chú</label>
+                            <label className="label">Notes</label>
                             <input type="text" value={form.notes}
-                                onChange={(e) => setForm({ ...form, notes: e.target.value })} className="input" placeholder="Nhập ghi chú..." />
+                                onChange={(e) => setForm({ ...form, notes: e.target.value })} className="input" placeholder="Enter notes..." />
                         </div>
                     </div>
                 </div>
 
                 <div className="card mb-6">
                     <div className="card-header">
-                        <h3 className="font-semibold text-slate-700">Danh sách sản phẩm</h3>
+                        <h3 className="font-semibold text-slate-700">Product List</h3>
                         <button type="button" onClick={addItem} className="btn-secondary btn-sm">
-                            <PlusIcon className="w-4 h-4" /> Thêm SP
+                            <PlusIcon className="w-4 h-4" /> Add Item
                         </button>
                     </div>
                     <div className="card-body p-0">
@@ -148,11 +148,11 @@ export default function IssueEditPage() {
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Sản phẩm</th>
-                                    <th className="w-32">Tồn kho</th>
-                                    <th className="w-32">Số lượng</th>
-                                    <th className="w-40">Đơn giá (VND)</th>
-                                    <th className="w-40 text-right">Thành tiền</th>
+                                    <th>Product</th>
+                                    <th className="w-32">Stock</th>
+                                    <th className="w-32">Qty</th>
+                                    <th className="w-40">Unit Price (VND)</th>
+                                    <th className="w-40 text-right">Subtotal</th>
                                     <th className="w-12"></th>
                                 </tr>
                             </thead>
@@ -166,29 +166,29 @@ export default function IssueEditPage() {
                                             <td className="text-slate-400">{i + 1}</td>
                                             <td>
                                                 <select value={it.productId}
-                                                    onChange={(e) => handleItemChange(i, 'productId', e.target.value)} className="input">
-                                                    <option value="">-- Chọn SP --</option>
+                                                    onChange={(e) => handleItemChange(i, 'productId', e.target.value)} className="input" required>
+                                                    <option value="">-- Select product --</option>
                                                     {products.map((p) => <option key={p.productId} value={p.productId}>{p.productName} ({p.unit})</option>)}
                                                 </select>
                                             </td>
                                             <td>
                                                 {stock !== null ? (
                                                     <span className={`text-xs font-semibold px-2 py-1 rounded-full ${stock === 0 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}`}>
-                                                        {stock.toLocaleString('vi-VN')}
+                                                        {stock.toLocaleString('en-US')}
                                                     </span>
                                                 ) : '—'}
                                             </td>
                                             <td>
                                                 <input type="number" min="0.01" step="0.01" value={it.quantity}
                                                     onChange={(e) => handleItemChange(i, 'quantity', e.target.value)}
-                                                    className={`input ${overStock ? 'input-error' : ''}`} placeholder="0" />
-                                                {overStock && <div className="text-red-500 text-xs mt-0.5">Vượt tồn kho!</div>}
+                                                    className={`input ${overStock ? 'input-error' : ''}`} placeholder="0" required />
+                                                {overStock && <div className="text-red-500 text-xs mt-0.5">Exceeds stock!</div>}
                                             </td>
                                             <td>
                                                 <input type="number" min="0" step="1" value={it.unitPrice}
-                                                    onChange={(e) => handleItemChange(i, 'unitPrice', e.target.value)} className="input" placeholder="0" />
+                                                    onChange={(e) => handleItemChange(i, 'unitPrice', e.target.value)} className="input" placeholder="0" required />
                                             </td>
-                                            <td className="text-right font-medium text-slate-700">{sub.toLocaleString('vi-VN')}₫</td>
+                                            <td className="text-right font-medium text-slate-700">{sub.toLocaleString('en-US')}₫</td>
                                             <td>
                                                 {items.length > 1 && (
                                                     <button type="button" onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 p-1">
@@ -202,8 +202,8 @@ export default function IssueEditPage() {
                             </tbody>
                             <tfoot>
                                 <tr className="border-t-2 border-slate-200 bg-slate-50">
-                                    <td colSpan={5} className="px-4 py-3 text-right font-semibold text-slate-700">Tổng cộng:</td>
-                                    <td className="px-4 py-3 text-right font-bold text-primary-600 text-base">{totalAmount.toLocaleString('vi-VN')}₫</td>
+                                    <td colSpan={5} className="px-4 py-3 text-right font-semibold text-slate-700">Total:</td>
+                                    <td className="px-4 py-3 text-right font-bold text-primary-600 text-base">{totalAmount.toLocaleString('en-US')}₫</td>
                                     <td />
                                 </tr>
                             </tfoot>
@@ -212,9 +212,9 @@ export default function IssueEditPage() {
                 </div>
 
                 <div className="flex justify-end gap-3">
-                    <button type="button" onClick={() => navigate(`/issue/${id}`)} className="btn-secondary">Hủy</button>
+                    <button type="button" onClick={() => navigate(`/issue/${id}`)} className="btn-secondary">Cancel</button>
                     <button type="submit" disabled={loading} className="btn-primary">
-                        {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                        {loading ? 'Saving...' : 'Save Changes'}
                     </button>
                 </div>
             </form>

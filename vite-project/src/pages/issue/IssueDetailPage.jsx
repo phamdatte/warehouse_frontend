@@ -18,7 +18,7 @@ export default function IssueDetailPage() {
     const fetchIssue = () => {
         issueApi.getById(id)
             .then((res) => setIssue(res.data))
-            .catch(() => toast.error('Không tìm thấy phiếu xuất'))
+            .catch(() => toast.error('Issue not found'))
             .finally(() => setLoading(false));
     };
 
@@ -27,28 +27,28 @@ export default function IssueDetailPage() {
     }, [id]);
 
     const handleApprove = async () => {
-        if (!window.confirm('Bạn có chắc muốn duyệt phiếu xuất này không?')) return;
+        if (!window.confirm('Are you sure you want to approve this issue?')) return;
         setApproving(true);
         try {
             await issueApi.approve(id);
-            toast.success('Duyệt phiếu xuất thành công!');
+            toast.success('Issue approved successfully!');
             fetchIssue();
         } catch (err) {
-            toast.error(err?.response?.data?.message || 'Duyệt phiếu thất bại');
+            toast.error(err?.response?.data?.message || 'Failed to approve issue');
         } finally {
             setApproving(false);
         }
     };
 
     const handleCancel = async () => {
-        if (!window.confirm('Bạn có chắc muốn hủy phiếu xuất này không?')) return;
+        if (!window.confirm('Are you sure you want to cancel this issue?')) return;
         setCancelling(true);
         try {
             await issueApi.cancel(id);
-            toast.success('Hủy phiếu xuất thành công!');
+            toast.success('Issue cancelled successfully!');
             fetchIssue();
         } catch (err) {
-            toast.error(err?.response?.data?.message || 'Hủy phiếu thất bại');
+            toast.error(err?.response?.data?.message || 'Failed to cancel issue');
         } finally {
             setCancelling(false);
         }
@@ -59,7 +59,7 @@ export default function IssueDetailPage() {
             <div className="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full" />
         </div>
     );
-    if (!issue) return <div className="text-center text-slate-400 py-20">Không tìm thấy phiếu</div>;
+    if (!issue) return <div className="text-center text-slate-400 py-20">Issue not found</div>;
 
     const totalAmount = issue.items?.reduce((s, it) => s + Number(it.subtotal || 0), 0) || 0;
     const isPending = issue.status === 'Pending';
@@ -67,13 +67,13 @@ export default function IssueDetailPage() {
     return (
         <div>
             <PageHeader
-                title={`Phiếu xuất: ${issue.issueNumber}`}
-                subtitle={`Ngày tạo: ${issue.createdAt ? new Date(issue.createdAt).toLocaleString('vi-VN') : '—'}`}
+                title={`Issue: ${issue.issueNumber}`}
+                subtitle={`Created: ${issue.createdAt ? new Date(issue.createdAt).toLocaleString('en-US') : '—'}`}
             >
-                <button onClick={() => navigate('/issue')} className="btn-secondary">← Quay lại</button>
+                <button onClick={() => navigate('/issue')} className="btn-secondary">← Back</button>
                 {isPending && (
                     <button onClick={() => navigate(`/issue/${id}/edit`)} className="btn-secondary">
-                        ✏️ Sửa phiếu
+                        ✏️ Edit
                     </button>
                 )}
                 {isPending && isManager() && (
@@ -82,7 +82,7 @@ export default function IssueDetailPage() {
                         disabled={approving}
                         className="btn-primary"
                     >
-                        {approving ? 'Đang duyệt...' : '✅ Duyệt phiếu'}
+                        {approving ? 'Approving...' : '✅ Approve'}
                     </button>
                 )}
                 {isPending && (
@@ -91,19 +91,19 @@ export default function IssueDetailPage() {
                         disabled={cancelling}
                         className="btn-danger"
                     >
-                        {cancelling ? 'Đang hủy...' : '🚫 Hủy phiếu'}
+                        {cancelling ? 'Cancelling...' : '🚫 Cancel'}
                     </button>
                 )}
             </PageHeader>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 {[
-                    { label: 'Khách hàng', value: issue.customerName || '—' },
-                    { label: 'Ngày xuất', value: issue.issueDate ? new Date(issue.issueDate).toLocaleString('vi-VN') : '—' },
-                    { label: 'Trạng thái', value: <StatusBadge status={issue.status} /> },
-                    { label: 'Người tạo', value: issue.createdByName || '—' },
-                    { label: 'Người duyệt', value: issue.approvedByName || '—' },
-                    { label: 'Ghi chú', value: issue.notes || '—' },
+                    { label: 'Customer', value: issue.customerName || '—' },
+                    { label: 'Issue Date', value: issue.issueDate ? new Date(issue.issueDate).toLocaleString('en-US') : '—' },
+                    { label: 'Status', value: <StatusBadge status={issue.status} /> },
+                    { label: 'Created By', value: issue.createdByName || '—' },
+                    { label: 'Approved By', value: issue.approvedByName || '—' },
+                    { label: 'Notes', value: issue.notes || '—' },
                 ].map(({ label, value }) => (
                     <div key={label} className="card card-body">
                         <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">{label}</div>
@@ -114,19 +114,19 @@ export default function IssueDetailPage() {
 
             <div className="card mb-6">
                 <div className="card-header">
-                    <h3 className="font-semibold text-slate-700">Chi tiết sản phẩm</h3>
-                    <span className="text-sm text-slate-500">{issue.items?.length || 0} mặt hàng</span>
+                    <h3 className="font-semibold text-slate-700">Product Details</h3>
+                    <span className="text-sm text-slate-500">{issue.items?.length || 0} items</span>
                 </div>
                 <div className="card-body p-0">
                     <table className="table">
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Sản phẩm</th>
-                                <th>Đơn vị</th>
-                                <th className="text-right">Số lượng</th>
-                                <th className="text-right">Đơn giá</th>
-                                <th className="text-right">Thành tiền</th>
+                                <th>Product</th>
+                                <th>Unit</th>
+                                <th className="text-right">Qty</th>
+                                <th className="text-right">Unit Price</th>
+                                <th className="text-right">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -138,19 +138,19 @@ export default function IssueDetailPage() {
                                         <div className="text-xs text-slate-400">{it.productCode}</div>
                                     </td>
                                     <td className="text-slate-500">{it.unit}</td>
-                                    <td className="text-right">{Number(it.quantity).toLocaleString('vi-VN')}</td>
-                                    <td className="text-right">{Number(it.unitPrice).toLocaleString('vi-VN')}₫</td>
+                                    <td className="text-right">{Number(it.quantity).toLocaleString('en-US')}</td>
+                                    <td className="text-right">{Number(it.unitPrice).toLocaleString('en-US')}₫</td>
                                     <td className="text-right font-semibold text-primary-600">
-                                        {Number(it.subtotal).toLocaleString('vi-VN')}₫
+                                        {Number(it.subtotal).toLocaleString('en-US')}₫
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                         <tfoot>
                             <tr className="border-t-2 border-slate-200 bg-slate-50">
-                                <td colSpan={5} className="px-4 py-3 text-right font-bold text-slate-700">Tổng cộng:</td>
+                                <td colSpan={5} className="px-4 py-3 text-right font-bold text-slate-700">Total:</td>
                                 <td className="px-4 py-3 text-right font-bold text-primary-700 text-lg">
-                                    {totalAmount.toLocaleString('vi-VN')}₫
+                                    {totalAmount.toLocaleString('en-US')}₫
                                 </td>
                             </tr>
                         </tfoot>

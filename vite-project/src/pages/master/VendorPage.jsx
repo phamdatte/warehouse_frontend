@@ -20,17 +20,17 @@ function VendorModal({ vendor, onSave, onClose }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
             <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
-                <h3 className="text-lg font-semibold mb-4">{vendor?.vendorId ? 'Sửa nhà cung cấp' : 'Thêm nhà cung cấp'}</h3>
+                <h3 className="text-lg font-semibold mb-4">{vendor?.vendorId ? 'Edit Vendor' : 'Add Vendor'}</h3>
                 <form onSubmit={handleSubmit} className="space-y-3">
-                    {[['vendorName', 'Tên NCC *', true], ['contactPerson', 'Người liên hệ', false], ['phone', 'Điện thoại', false], ['email', 'Email', false], ['address', 'Địa chỉ', false]].map(([name, label, req]) => (
+                    {[['vendorName', 'Vendor Name *', true], ['contactPerson', 'Contact Person', false], ['phone', 'Phone', false], ['email', 'Email', false], ['address', 'Address', false]].map(([name, label, req]) => (
                         <div key={name}>
                             <label className="label">{label}</label>
                             <input name={name} value={form[name] || ''} onChange={handleChange} className="input" required={req} />
                         </div>
                     ))}
                     <div className="flex justify-end gap-3 pt-2">
-                        <button type="button" onClick={onClose} className="btn-secondary">Hủy</button>
-                        <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Đang lưu...' : 'Lưu'}</button>
+                        <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+                        <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Saving...' : 'Save'}</button>
                     </div>
                 </form>
             </div>
@@ -54,7 +54,7 @@ export default function VendorPage() {
             const res = await masterApi.getVendors({ page: p, size: 15 });
             setData(res.data.content || []);
             setTotalPages(res.data.totalPages || 0); setTotalElements(res.data.totalElements || 0); setPage(p);
-        } catch { toast.error('Không thể tải'); } finally { setLoading(false); }
+        } catch { toast.error('Failed to load'); } finally { setLoading(false); }
     }, []);
     useEffect(() => { fetch(0); }, [fetch]);
 
@@ -62,25 +62,25 @@ export default function VendorPage() {
         try {
             if (modal !== 'create') await masterApi.updateVendor(modal.vendorId, form);
             else await masterApi.createVendor(form);
-            toast.success('Lưu thành công!'); setModal(null); fetch(page);
-        } catch (err) { toast.error(err.response?.data?.message || 'Lưu thất bại'); }
+            toast.success('Saved successfully!'); setModal(null); fetch(page);
+        } catch (err) { toast.error(err.response?.data?.message || 'Failed to save'); }
     };
     const handleDelete = async () => {
-        try { await masterApi.deleteVendor(deleteTarget.vendorId); toast.success('Xóa thành công!'); setDeleteTarget(null); fetch(page); }
-        catch (err) { toast.error(err.response?.data?.message || 'Xóa thất bại'); }
+        try { await masterApi.deleteVendor(deleteTarget.vendorId); toast.success('Deleted successfully!'); setDeleteTarget(null); fetch(page); }
+        catch (err) { toast.error(err.response?.data?.message || 'Failed to delete'); }
     };
 
     const columns = [
-        { key: 'vendorName', label: 'Tên nhà cung cấp' },
-        { key: 'contactPerson', label: 'Người liên hệ', width: '150px' },
-        { key: 'phone', label: 'SĐT', width: '120px' },
+        { key: 'vendorName', label: 'Vendor Name' },
+        { key: 'contactPerson', label: 'Contact Person', width: '150px' },
+        { key: 'phone', label: 'Phone', width: '120px' },
         { key: 'email', label: 'Email', width: '180px' },
         ...(isManager() ? [{
             key: 'action', label: '', width: '100px',
             render: (_, row) => (
                 <div className="flex gap-2">
-                    <button onClick={() => setModal(row)} className="text-primary-500 text-xs font-medium">Sửa</button>
-                    <button onClick={() => setDeleteTarget(row)} className="text-red-500 text-xs font-medium">Xóa</button>
+                    <button onClick={() => setModal(row)} className="text-primary-500 text-xs font-medium">Edit</button>
+                    <button onClick={() => setDeleteTarget(row)} className="text-red-500 text-xs font-medium">Delete</button>
                 </div>
             ),
         }] : []),
@@ -88,15 +88,15 @@ export default function VendorPage() {
 
     return (
         <div>
-            <PageHeader title="Nhà cung cấp" subtitle={`${totalElements} nhà cung cấp`}>
-                {isManager() && <button onClick={() => setModal('create')} className="btn-primary">+ Thêm</button>}
+            <PageHeader title="Vendors" subtitle={`${totalElements} vendors`}>
+                {isManager() && <button onClick={() => setModal('create')} className="btn-primary">+ Add</button>}
             </PageHeader>
             <div className="card"><div className="card-body p-0">
                 <DataTable columns={columns} data={data} loading={loading}
                     pagination={{ page, totalPages, totalElements }} onPageChange={fetch} />
             </div></div>
             {modal && <VendorModal vendor={modal !== 'create' ? modal : null} onSave={handleSave} onClose={() => setModal(null)} />}
-            <ConfirmModal isOpen={!!deleteTarget} title="Xóa nhà cung cấp" message={`Xóa NCC "${deleteTarget?.vendorName}"?`} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} />
+            <ConfirmModal isOpen={!!deleteTarget} title="Delete vendor" message={`Are you sure you want to delete vendor "${deleteTarget?.vendorName}"?`} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} />
         </div>
     );
 }
