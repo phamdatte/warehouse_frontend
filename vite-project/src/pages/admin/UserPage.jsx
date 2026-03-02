@@ -58,13 +58,47 @@ function CreateUserModal({ onSave, onClose }) {
     );
 }
 
+function ChangeRoleModal({ user, roles, onSave, onClose }) {
+    const [roleId, setRoleId] = useState(user.roleId);
+    const [loading, setLoading] = useState(false);
+    const handleSubmit = async (e) => {
+        e.preventDefault(); setLoading(true);
+        try { await onSave(roleId); } finally { setLoading(false); }
+    };
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-sm mx-4 p-6">
+                <h3 className="text-lg font-semibold mb-1">Change Role</h3>
+                <p className="text-sm text-slate-500 mb-4">{user.fullName} ({user.username})</p>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="label">New Role</label>
+                        <select value={roleId} onChange={e => setRoleId(Number(e.target.value))} className="input">
+                            {roles.map(r => (
+                                <option key={r.roleId} value={r.roleId}>{r.roleName}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex justify-end gap-3">
+                        <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+                        <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Saving...' : 'Save'}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
 export default function UserPage() {
     const [data, setData] = useState([]);
+    const [roles, setRoles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
     const [showCreate, setShowCreate] = useState(false);
+    const [changeRoleTarget, setChangeRoleTarget] = useState(null); // user object
 
     const fetch = useCallback(async (p = 0) => {
         setLoading(true);
@@ -78,7 +112,11 @@ export default function UserPage() {
         finally { setLoading(false); }
     }, []);
 
-    useEffect(() => { fetch(0); }, [fetch]);
+    useEffect(() => {
+        fetch(0);
+        // Load available roles for the change-role modal
+        adminApi.getRoles().then(res => setRoles(res.data || [])).catch(() => { });
+    }, [fetch]);
 
     const handleCreate = async (form) => {
         try {
@@ -97,12 +135,21 @@ export default function UserPage() {
         } catch (err) { toast.error(err.response?.data?.message || 'Operation failed'); }
     };
 
+    const handleChangeRole = async (roleId) => {
+        try {
+            await adminApi.changeRole(changeRoleTarget.userId, roleId);
+            toast.success(`Role updated for ${changeRoleTarget.fullName}!`);
+            setChangeRoleTarget(null);
+            fetch(page);
+        } catch (err) { toast.error(err.response?.data?.message || 'Failed to change role'); }
+    };
+
     const columns = [
         { key: 'username', label: 'Username', width: '140px' },
         { key: 'fullName', label: 'Full Name' },
         { key: 'email', label: 'Email', width: '180px' },
         {
-            key: 'roleName', label: 'Role', width: '100px',
+            key: 'roleName', label: 'Role', width: '120px',
             render: (v) => (
                 <span className={`badge ${v === 'Admin' ? 'badge-approved' : v === 'Manager' ? 'badge-pending' : 'bg-slate-100 text-slate-600'}`}>{v}</span>
             ),
@@ -114,14 +161,22 @@ export default function UserPage() {
             ),
         },
         {
-            key: 'action', label: '', width: '100px',
+            key: 'action', label: '', width: '150px',
             render: (_, row) => (
-                <button
-                    onClick={() => handleToggle(row)}
-                    className={`text-xs font-medium ${row.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-600 hover:text-green-800'}`}
-                >
-                    {row.isActive ? 'Lock' : 'Unlock'}
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setChangeRoleTarget(row)}
+                        className="text-xs font-medium text-primary-600 hover:text-primary-800"
+                    >
+                        Change Role
+                    </button>
+                    <button
+                        onClick={() => handleToggle(row)}
+                        className={`text-xs font-medium ${row.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-600 hover:text-green-800'}`}
+                    >
+                        {row.isActive ? 'Lock' : 'Unlock'}
+                    </button>
+                </div>
             ),
         },
     ];
@@ -138,6 +193,14 @@ export default function UserPage() {
                 </div>
             </div>
             {showCreate && <CreateUserModal onSave={handleCreate} onClose={() => setShowCreate(false)} />}
+            {changeRoleTarget && (
+                <ChangeRoleModal
+                    user={changeRoleTarget}
+                    roles={roles}
+                    onSave={handleChangeRole}
+                    onClose={() => setChangeRoleTarget(null)}
+                />
+            )}
         </div>
     );
 }

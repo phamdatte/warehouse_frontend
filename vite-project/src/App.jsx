@@ -38,6 +38,8 @@ import CustomerPage from './pages/master/CustomerPage';
 
 // Admin
 import UserPage from './pages/admin/UserPage';
+import RolePage from './pages/admin/RolePage';
+import PagePermissionPage from './pages/admin/PagePermissionPage';
 
 export default function App() {
   return (
@@ -84,6 +86,8 @@ export default function App() {
               {/* Admin — Admin only */}
               <Route element={<AdminRoute />}>
                 <Route path="admin/user" element={<UserPage />} />
+                <Route path="admin/role" element={<RolePage />} />
+                <Route path="admin/page-permission" element={<PagePermissionPage />} />
               </Route>
             </Route>
           </Route>

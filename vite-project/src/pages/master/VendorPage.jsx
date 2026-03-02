@@ -69,18 +69,39 @@ export default function VendorPage() {
         try { await masterApi.deleteVendor(deleteTarget.vendorId); toast.success('Deleted successfully!'); setDeleteTarget(null); fetch(page); }
         catch (err) { toast.error(err.response?.data?.message || 'Failed to delete'); }
     };
+    const handleToggle = async (row) => {
+        try {
+            await masterApi.toggleVendor(row.vendorId);
+            toast.success(`Vendor "${row.vendorName}" ${row.isActive ? 'deactivated' : 'activated'}!`);
+            fetch(page);
+        } catch (err) { toast.error(err.response?.data?.message || 'Operation failed'); }
+    };
 
     const columns = [
         { key: 'vendorName', label: 'Vendor Name' },
         { key: 'contactPerson', label: 'Contact Person', width: '150px' },
         { key: 'phone', label: 'Phone', width: '120px' },
         { key: 'email', label: 'Email', width: '180px' },
+        {
+            key: 'isActive', label: 'Status', width: '90px',
+            render: (v) => (
+                <span className={`badge ${v ? 'badge-completed' : 'badge-cancelled'}`}>
+                    {v ? 'Active' : 'Inactive'}
+                </span>
+            ),
+        },
         ...(isManager() ? [{
-            key: 'action', label: '', width: '100px',
+            key: 'action', label: '', width: '140px',
             render: (_, row) => (
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                     <button onClick={() => setModal(row)} className="text-primary-500 text-xs font-medium">Edit</button>
-                    <button onClick={() => setDeleteTarget(row)} className="text-red-500 text-xs font-medium">Delete</button>
+                    <button
+                        onClick={() => handleToggle(row)}
+                        className={`text-xs font-medium ${row.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-600 hover:text-green-800'}`}
+                    >
+                        {row.isActive ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button onClick={() => setDeleteTarget(row)} className="text-slate-400 hover:text-red-500 text-xs font-medium">Delete</button>
                 </div>
             ),
         }] : []),

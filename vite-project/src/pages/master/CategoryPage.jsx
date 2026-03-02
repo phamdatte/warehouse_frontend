@@ -37,7 +37,13 @@ function SimpleModal({ title, fields, data, onSave, onClose }) {
     );
 }
 
-function useCrud({ getAll, create, update, delete: del, idKey, getFields }) {
+// ---- CategoryPage ----
+export function CategoryPage() {
+    const { isManager } = useAuth();
+    const FIELDS = [
+        { name: 'categoryName', label: 'Category Name', required: true },
+        { name: 'description', label: 'Description' },
+    ];
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(0);
@@ -49,21 +55,21 @@ function useCrud({ getAll, create, update, delete: del, idKey, getFields }) {
     const fetch = useCallback(async (p = 0) => {
         setLoading(true);
         try {
-            const res = await getAll({ page: p, size: 15 });
+            const res = await masterApi.getCategories({ page: p, size: 15 });
             setData(res.data.content || []);
             setTotalPages(res.data.totalPages || 0);
             setTotalElements(res.data.totalElements || 0);
             setPage(p);
-        } catch { toast.error('Failed to load data'); }
+        } catch { toast.error('Failed to load categories'); }
         finally { setLoading(false); }
-    }, [getAll]);
+    }, []);
 
     useEffect(() => { fetch(0); }, [fetch]);
 
     const handleSave = async (form) => {
         try {
-            if (modal !== 'create') await update(modal[idKey], form);
-            else await create(form);
+            if (modal !== 'create') await masterApi.updateCategory(modal.categoryId, form);
+            else await masterApi.createCategory(form);
             toast.success('Saved successfully!');
             setModal(null);
             fetch(page);
@@ -72,53 +78,62 @@ function useCrud({ getAll, create, update, delete: del, idKey, getFields }) {
 
     const handleDelete = async () => {
         try {
-            await del(deleteTarget[idKey]);
+            await masterApi.deleteCategory(deleteTarget.categoryId);
             toast.success('Deleted successfully!');
             setDeleteTarget(null);
             fetch(page);
         } catch (err) { toast.error(err.response?.data?.message || 'Failed to delete'); }
     };
 
-    return { data, loading, page, totalPages, totalElements, fetch, modal, setModal, deleteTarget, setDeleteTarget, handleSave, handleDelete };
-}
+    const handleToggle = async (row) => {
+        try {
+            await masterApi.toggleCategory(row.categoryId);
+            toast.success(`Category "${row.categoryName}" ${row.isActive ? 'deactivated' : 'activated'}!`);
+            fetch(page);
+        } catch (err) { toast.error(err.response?.data?.message || 'Operation failed'); }
+    };
 
-// ---- CategoryPage ----
-export function CategoryPage() {
-    const { isManager } = useAuth();
-    const FIELDS = [
-        { name: 'categoryName', label: 'Category Name', required: true },
-        { name: 'description', label: 'Description' },
-    ];
-    const crud = useCrud({
-        getAll: masterApi.getCategories, create: masterApi.createCategory,
-        update: masterApi.updateCategory, delete: masterApi.deleteCategory, idKey: 'categoryId',
-    });
     const columns = [
         { key: 'categoryName', label: 'Category Name' },
         { key: 'description', label: 'Description' },
+        {
+            key: 'isActive', label: 'Status', width: '90px',
+            render: (v) => (
+                <span className={`badge ${v ? 'badge-completed' : 'badge-cancelled'}`}>
+                    {v ? 'Active' : 'Inactive'}
+                </span>
+            ),
+        },
         ...(isManager() ? [{
-            key: 'action', label: '', width: '100px',
+            key: 'action', label: '', width: '140px',
             render: (_, row) => (
-                <div className="flex gap-2">
-                    <button onClick={() => crud.setModal(row)} className="text-primary-500 text-xs font-medium">Edit</button>
-                    <button onClick={() => crud.setDeleteTarget(row)} className="text-red-500 text-xs font-medium">Delete</button>
+                <div className="flex gap-3">
+                    <button onClick={() => setModal(row)} className="text-primary-500 text-xs font-medium">Edit</button>
+                    <button
+                        onClick={() => handleToggle(row)}
+                        className={`text-xs font-medium ${row.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-600 hover:text-green-800'}`}
+                    >
+                        {row.isActive ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button onClick={() => setDeleteTarget(row)} className="text-slate-400 hover:text-red-500 text-xs font-medium">Delete</button>
                 </div>
             ),
         }] : []),
     ];
+
     return (
         <div>
-            <PageHeader title="Product Categories" subtitle={`${crud.totalElements} categories`}>
-                {isManager() && <button onClick={() => crud.setModal('create')} className="btn-primary">+ Add</button>}
+            <PageHeader title="Product Categories" subtitle={`${totalElements} categories`}>
+                {isManager() && <button onClick={() => setModal('create')} className="btn-primary">+ Add</button>}
             </PageHeader>
             <div className="card">
                 <div className="card-body p-0">
-                    <DataTable columns={columns} data={crud.data} loading={crud.loading}
-                        pagination={{ page: crud.page, totalPages: crud.totalPages, totalElements: crud.totalElements }} onPageChange={crud.fetch} />
+                    <DataTable columns={columns} data={data} loading={loading}
+                        pagination={{ page, totalPages, totalElements }} onPageChange={fetch} />
                 </div>
             </div>
-            {crud.modal && <SimpleModal title={crud.modal === 'create' ? 'Add Category' : 'Edit Category'} fields={FIELDS} data={crud.modal !== 'create' ? crud.modal : null} onSave={crud.handleSave} onClose={() => crud.setModal(null)} />}
-            <ConfirmModal isOpen={!!crud.deleteTarget} title="Delete category" message={`Are you sure you want to delete category "${crud.deleteTarget?.categoryName}"?`} onConfirm={crud.handleDelete} onCancel={() => crud.setDeleteTarget(null)} />
+            {modal && <SimpleModal title={modal === 'create' ? 'Add Category' : 'Edit Category'} fields={FIELDS} data={modal !== 'create' ? modal : null} onSave={handleSave} onClose={() => setModal(null)} />}
+            <ConfirmModal isOpen={!!deleteTarget} title="Delete category" message={`Are you sure you want to delete category "${deleteTarget?.categoryName}"?`} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} />
         </div>
     );
 }

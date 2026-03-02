@@ -7,7 +7,14 @@ import DataTable from '../../components/DataTable';
 import ConfirmModal from '../../components/ConfirmModal';
 
 function ProductModal({ product, categories, onSave, onClose }) {
-    const [form, setForm] = useState(product || { productName: '', productCode: '', categoryId: '', unit: '', unitPrice: '', description: '' });
+    const [form, setForm] = useState(product ? {
+        productName: product.productName || '',
+        productCode: product.productCode || '',
+        categoryId: product.category?.categoryId || '',
+        unit: product.unit || '',
+        unitPrice: product.unitPrice || '',
+        description: product.description || '',
+    } : { productName: '', productCode: '', categoryId: '', unit: '', unitPrice: '', description: '' });
     const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -84,7 +91,7 @@ export default function ProductPage() {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
-    const [modal, setModal] = useState(null); // null | 'create' | product object
+    const [modal, setModal] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
 
     useEffect(() => {
@@ -116,21 +123,48 @@ export default function ProductPage() {
         }
     };
 
+    const handleToggle = async (row) => {
+        try {
+            await masterApi.toggleProduct(row.productId);
+            toast.success(`Product "${row.productName}" ${row.isActive ? 'deactivated' : 'activated'}!`);
+            fetch(page);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Operation failed');
+        }
+    };
+
     const columns = [
-        { key: 'productCode', label: 'Product Code', width: '100px' },
+        { key: 'productCode', label: 'Code', width: '90px' },
         { key: 'productName', label: 'Product Name' },
-        { key: 'categoryName', label: 'Category', width: '140px' },
-        { key: 'unit', label: 'Unit', width: '80px' },
+        {
+            key: 'category', label: 'Category', width: '130px',
+            render: (v) => v?.categoryName || '—',
+        },
+        { key: 'unit', label: 'Unit', width: '70px' },
         {
             key: 'unitPrice', label: 'Unit Price', width: '120px',
             render: (v) => v ? `${Number(v).toLocaleString('vi-VN')}₫` : '—'
         },
+        {
+            key: 'isActive', label: 'Status', width: '90px',
+            render: (v) => (
+                <span className={`badge ${v ? 'badge-completed' : 'badge-cancelled'}`}>
+                    {v ? 'Active' : 'Inactive'}
+                </span>
+            ),
+        },
         ...(isManager() ? [{
-            key: 'action', label: '', width: '100px',
+            key: 'action', label: '', width: '140px',
             render: (_, row) => (
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                     <button onClick={() => setModal(row)} className="text-primary-500 hover:text-primary-700 text-xs font-medium">Edit</button>
-                    <button onClick={() => setDeleteTarget(row)} className="text-red-500 hover:text-red-700 text-xs font-medium">Delete</button>
+                    <button
+                        onClick={() => handleToggle(row)}
+                        className={`text-xs font-medium ${row.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-600 hover:text-green-800'}`}
+                    >
+                        {row.isActive ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button onClick={() => setDeleteTarget(row)} className="text-slate-400 hover:text-red-500 text-xs font-medium">Delete</button>
                 </div>
             ),
         }] : []),
