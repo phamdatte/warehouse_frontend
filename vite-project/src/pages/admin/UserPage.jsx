@@ -58,6 +58,55 @@ function CreateUserModal({ onSave, onClose }) {
     );
 }
 
+function EditUserModal({ user, onSave, onClose }) {
+    const [form, setForm] = useState({
+        fullName: user.fullName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        password: '',
+    });
+    const [loading, setLoading] = useState(false);
+    const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+    const handleSubmit = async (e) => {
+        e.preventDefault(); setLoading(true);
+        try { await onSave(form); } finally { setLoading(false); }
+    };
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+                <h3 className="text-lg font-semibold mb-1">Edit User</h3>
+                <p className="text-sm text-slate-500 mb-4">{user.fullName} ({user.username})</p>
+                <form onSubmit={handleSubmit} className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="col-span-2">
+                            <label className="label">Full Name *</label>
+                            <input name="fullName" value={form.fullName} onChange={handleChange} className="input" required />
+                        </div>
+                        <div>
+                            <label className="label">Email</label>
+                            <input name="email" type="email" value={form.email} onChange={handleChange} className="input" />
+                        </div>
+                        <div>
+                            <label className="label">Phone</label>
+                            <input name="phone" value={form.phone} onChange={handleChange} className="input" />
+                        </div>
+                        <div className="col-span-2">
+                            <label className="label">New Password <span className="text-slate-400 font-normal">(leave blank to keep current)</span></label>
+                            <input name="password" type="password" value={form.password} onChange={handleChange}
+                                className="input" placeholder="••••••••" />
+                        </div>
+                    </div>
+                    <div className="flex justify-end gap-3 pt-2">
+                        <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+                        <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Saving...' : 'Save Changes'}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
 function ChangeRoleModal({ user, roles, onSave, onClose }) {
     const [roleId, setRoleId] = useState(user.roleId);
     const [loading, setLoading] = useState(false);
@@ -98,7 +147,8 @@ export default function UserPage() {
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
     const [showCreate, setShowCreate] = useState(false);
-    const [changeRoleTarget, setChangeRoleTarget] = useState(null); // user object
+    const [editTarget, setEditTarget] = useState(null);       // user to edit
+    const [changeRoleTarget, setChangeRoleTarget] = useState(null); // user to change role
 
     const fetch = useCallback(async (p = 0) => {
         setLoading(true);
@@ -114,7 +164,6 @@ export default function UserPage() {
 
     useEffect(() => {
         fetch(0);
-        // Load available roles for the change-role modal
         adminApi.getRoles().then(res => setRoles(res.data || [])).catch(() => { });
     }, [fetch]);
 
@@ -125,6 +174,15 @@ export default function UserPage() {
             setShowCreate(false);
             fetch(page);
         } catch (err) { toast.error(err.response?.data?.message || 'Failed to create account'); }
+    };
+
+    const handleEdit = async (form) => {
+        try {
+            await adminApi.updateUser(editTarget.userId, form);
+            toast.success('User updated successfully!');
+            setEditTarget(null);
+            fetch(page);
+        } catch (err) { toast.error(err.response?.data?.message || 'Failed to update user'); }
     };
 
     const handleToggle = async (user) => {
@@ -148,6 +206,7 @@ export default function UserPage() {
         { key: 'username', label: 'Username', width: '140px' },
         { key: 'fullName', label: 'Full Name' },
         { key: 'email', label: 'Email', width: '180px' },
+        { key: 'phone', label: 'Phone', width: '130px' },
         {
             key: 'roleName', label: 'Role', width: '120px',
             render: (v) => (
@@ -161,14 +220,20 @@ export default function UserPage() {
             ),
         },
         {
-            key: 'action', label: '', width: '150px',
+            key: 'action', label: '', width: '190px',
             render: (_, row) => (
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={() => setChangeRoleTarget(row)}
+                        onClick={() => setEditTarget(row)}
                         className="text-xs font-medium text-primary-600 hover:text-primary-800"
                     >
-                        Change Role
+                        Edit
+                    </button>
+                    <button
+                        onClick={() => setChangeRoleTarget(row)}
+                        className="text-xs font-medium text-slate-600 hover:text-slate-800"
+                    >
+                        Role
                     </button>
                     <button
                         onClick={() => handleToggle(row)}
@@ -193,6 +258,13 @@ export default function UserPage() {
                 </div>
             </div>
             {showCreate && <CreateUserModal onSave={handleCreate} onClose={() => setShowCreate(false)} />}
+            {editTarget && (
+                <EditUserModal
+                    user={editTarget}
+                    onSave={handleEdit}
+                    onClose={() => setEditTarget(null)}
+                />
+            )}
             {changeRoleTarget && (
                 <ChangeRoleModal
                     user={changeRoleTarget}
