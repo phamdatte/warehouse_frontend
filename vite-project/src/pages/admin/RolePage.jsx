@@ -115,8 +115,6 @@ export default function RolePage() {
         }
     };
 
-    const SYSTEM_ROLES = ['Admin', 'Manager', 'Staff'];
-
     const columns = [
         {
             key: 'roleName', label: 'Role Name', width: '160px',
@@ -139,18 +137,13 @@ export default function RolePage() {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => setModal({ mode: 'edit', role: row })}
-                        disabled={SYSTEM_ROLES.includes(row.roleName)}
-                        className="text-xs font-medium text-primary-600 hover:text-primary-800 disabled:opacity-30 disabled:cursor-not-allowed"
-                        title={SYSTEM_ROLES.includes(row.roleName) ? 'System roles cannot be renamed' : 'Edit'}
+                        className="text-xs font-medium text-primary-600 hover:text-primary-800"
                     >
                         Edit
                     </button>
                     <button
                         onClick={() => handleToggle(row)}
-                        disabled={SYSTEM_ROLES.includes(row.roleName)}
-                        className={`text-xs font-medium disabled:opacity-30 disabled:cursor-not-allowed ${row.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-600 hover:text-green-800'
-                            }`}
-                        title={SYSTEM_ROLES.includes(row.roleName) ? 'System roles cannot be deactivated' : ''}
+                        className={`text-xs font-medium ${row.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-600 hover:text-green-800'}`}
                     >
                         {row.isActive ? 'Deactivate' : 'Activate'}
                     </button>
@@ -173,12 +166,7 @@ export default function RolePage() {
                 </div>
             </div>
 
-            {/* Info banner */}
-            <div className="mt-4 p-4 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
-                <strong>Note:</strong> System roles (Admin, Manager, Staff) cannot be renamed or deactivated.
-                To change what pages each role can access, go to{' '}
-                <a href="/admin/page-permission" className="underline font-medium">Page Permissions</a>.
-            </div>
+
 
             {modal?.mode === 'create' && (
                 <RoleFormModal onSave={handleCreate} onClose={() => setModal(null)} />
