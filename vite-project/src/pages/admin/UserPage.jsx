@@ -4,8 +4,8 @@ import { adminApi } from '../../api/adminApi';
 import PageHeader from '../../components/PageHeader';
 import DataTable from '../../components/DataTable';
 
-function CreateUserModal({ onSave, onClose }) {
-    const [form, setForm] = useState({ username: '', password: '', fullName: '', email: '', phone: '', roleId: 3 });
+function CreateUserModal({ roles, onSave, onClose }) {
+    const [form, setForm] = useState({ username: '', password: '', fullName: '', email: '', phone: '', roleId: roles?.length > 0 ? roles[0].roleId : '' });
     const [loading, setLoading] = useState(false);
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
     const handleSubmit = async (e) => {
@@ -41,10 +41,11 @@ function CreateUserModal({ onSave, onClose }) {
                         </div>
                         <div className="col-span-2">
                             <label className="label">Role</label>
-                            <select name="roleId" value={form.roleId} onChange={handleChange} className="input">
-                                <option value={1}>Admin</option>
-                                <option value={2}>Manager</option>
-                                <option value={3}>Staff</option>
+                            <select name="roleId" value={form.roleId} onChange={handleChange} className="input" required>
+                                <option value="">-- Select Role --</option>
+                                {roles.map(r => (
+                                    <option key={r.roleId} value={r.roleId}>{r.roleName}</option>
+                                ))}
                             </select>
                         </div>
                     </div>
@@ -257,7 +258,7 @@ export default function UserPage() {
                         pagination={{ page, totalPages, totalElements }} onPageChange={fetch} />
                 </div>
             </div>
-            {showCreate && <CreateUserModal onSave={handleCreate} onClose={() => setShowCreate(false)} />}
+            {showCreate && <CreateUserModal roles={roles} onSave={handleCreate} onClose={() => setShowCreate(false)} />}
             {editTarget && (
                 <EditUserModal
                     user={editTarget}
