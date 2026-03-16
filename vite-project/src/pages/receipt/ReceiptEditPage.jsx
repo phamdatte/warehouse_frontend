@@ -20,8 +20,8 @@ export default function ReceiptEditPage() {
 
     useEffect(() => {
         Promise.all([
-            masterApi.getVendors({ size: 100 }),
-            masterApi.getProducts({ size: 200 }),
+            masterApi.getVendors({ size: 100, activeOnly: true }),
+            masterApi.getProducts({ size: 200, activeOnly: true }),
             receiptApi.getById(id),
         ]).then(([v, p, r]) => {
             setVendors(v.data.content || []);

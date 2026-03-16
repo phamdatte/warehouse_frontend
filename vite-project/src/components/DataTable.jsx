@@ -16,7 +16,7 @@ function Skeleton({ rows = 5, cols = 4 }) {
     );
 }
 
-export default function DataTable({ columns, data, loading, pagination, onPageChange, emptyMessage = 'No data' }) {
+export default function DataTable({ columns, data, loading, pagination, onPageChange, onRowClick, rowClassName, emptyMessage = 'No data' }) {
     const { page = 0, totalPages = 0, totalElements = 0 } = pagination || {};
 
     return (
@@ -40,7 +40,10 @@ export default function DataTable({ columns, data, loading, pagination, onPageCh
                                 </tr>
                             ) : (
                                 data.map((row, i) => (
-                                    <tr key={row.id || i}>
+                                    <tr key={row.id || i}
+                                        className={rowClassName || ''}
+                                        onClick={() => onRowClick && onRowClick(row)}
+                                    >
                                         {columns.map((col) => (
                                             <td key={col.key}>
                                                 {col.render ? col.render(row[col.key], row) : row[col.key] ?? '—'}

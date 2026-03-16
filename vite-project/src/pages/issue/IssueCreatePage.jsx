@@ -24,8 +24,8 @@ export default function IssueCreatePage() {
 
     useEffect(() => {
         Promise.all([
-            masterApi.getCustomers({ size: 100 }),
-            masterApi.getProducts({ size: 200 }),
+            masterApi.getCustomers({ size: 100, activeOnly: true }),
+            masterApi.getProducts({ size: 200, activeOnly: true }),
             inventoryApi.getAll({ size: 200 }),
         ]).then(([c, p, inv]) => {
             setCustomers(c.data.content || []);

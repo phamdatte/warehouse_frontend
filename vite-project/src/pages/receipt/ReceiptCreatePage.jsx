@@ -22,8 +22,8 @@ export default function ReceiptCreatePage() {
 
     useEffect(() => {
         Promise.all([
-            masterApi.getVendors({ size: 100 }),
-            masterApi.getProducts({ size: 200 }),
+            masterApi.getVendors({ size: 100, activeOnly: true }),
+            masterApi.getProducts({ size: 200, activeOnly: true }),
         ]).then(([v, p]) => {
             setVendors(v.data.content || []);
             setProducts(p.data.content || []);

@@ -22,8 +22,8 @@ export default function IssueEditPage() {
 
     useEffect(() => {
         Promise.all([
-            masterApi.getCustomers({ size: 100 }),
-            masterApi.getProducts({ size: 200 }),
+            masterApi.getCustomers({ size: 100, activeOnly: true }),
+            masterApi.getProducts({ size: 200, activeOnly: true }),
             inventoryApi.getAll({ size: 200 }),
             issueApi.getById(id),
         ]).then(([c, p, inv, gi]) => {

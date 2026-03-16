@@ -12,13 +12,14 @@ export default function ReportReceiptPage() {
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
     const [filters, setFilters] = useState({ fromDate: '', toDate: '' });
+    const [applied, setApplied] = useState({ fromDate: '', toDate: '' });
 
     const fetch = useCallback(async (p = 0) => {
         setLoading(true);
         try {
             const params = { page: p, size: 15 };
-            if (filters.fromDate) params.fromDate = filters.fromDate;
-            if (filters.toDate) params.toDate = filters.toDate;
+            if (applied.fromDate) params.fromDate = applied.fromDate;
+            if (applied.toDate)   params.toDate   = applied.toDate;
             const res = await reportApi.getReceipts(params);
             setData(res.data.content || []);
             setTotalPages(res.data.totalPages || 0);
@@ -29,9 +30,16 @@ export default function ReportReceiptPage() {
         } finally {
             setLoading(false);
         }
-    }, [filters]);
+    }, [applied]);
 
     useEffect(() => { fetch(0); }, [fetch]);
+
+    const handleSearch = () => { setApplied({ ...filters }); };
+    const handleClear  = () => {
+        const empty = { fromDate: '', toDate: '' };
+        setFilters(empty);
+        setApplied(empty);
+    };
 
     const columns = [
         { key: 'receiptNumber', label: 'Receipt No.', width: '130px' },
@@ -64,8 +72,8 @@ export default function ReportReceiptPage() {
                             <input type="date" value={filters.toDate}
                                 onChange={(e) => setFilters({ ...filters, toDate: e.target.value })} className="input w-40" />
                         </div>
-                        <button onClick={() => fetch(0)} className="btn-primary btn-sm h-9">View Report</button>
-                        <button onClick={() => setFilters({ fromDate: '', toDate: '' })} className="btn-secondary btn-sm h-9">Clear filter</button>
+                        <button onClick={handleSearch} className="btn-primary btn-sm h-9">View Report</button>
+                        <button onClick={handleClear} className="btn-secondary btn-sm h-9">Clear filter</button>
                     </div>
                 </div>
             </div>
