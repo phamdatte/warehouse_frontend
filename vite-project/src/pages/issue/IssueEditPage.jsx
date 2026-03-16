@@ -179,7 +179,7 @@ export default function IssueEditPage() {
                                                 ) : '—'}
                                             </td>
                                             <td>
-                                                <input type="number" min="0.01" step="0.01" value={it.quantity}
+                                                <input type="number" min="1" step="1" value={it.quantity}
                                                     onChange={(e) => handleItemChange(i, 'quantity', e.target.value)}
                                                     className={`input ${overStock ? 'input-error' : ''}`} placeholder="0" required />
                                                 {overStock && <div className="text-red-500 text-xs mt-0.5">Exceeds stock!</div>}

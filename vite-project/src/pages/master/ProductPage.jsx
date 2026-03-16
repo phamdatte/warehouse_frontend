@@ -51,7 +51,10 @@ function ProductModal({ product, categories, onSave, onClose }) {
                         </div>
                         <div>
                             <label className="label">Product Code</label>
-                            <input name="productCode" value={form.productCode} onChange={handleChange} className="input" />
+                            <input name="productCode" value={form.productCode} onChange={handleChange} className="input" 
+                                disabled={!product?.productId} 
+                                placeholder={!product?.productId ? '(Auto-generated)' : ''} 
+                            />
                         </div>
                         <div>
                             <label className="label">Category</label>

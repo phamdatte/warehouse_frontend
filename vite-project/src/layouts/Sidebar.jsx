@@ -37,6 +37,8 @@ const PAGE_NAMES = {
     '/vendor': 'Vendors',
     '/customer': 'Customers',
     '/admin/user': 'Users',
+    '/admin/role': 'Roles',
+    '/admin/page-permission': 'Page Permissions',
 };
 
 // Map page_url → route path trong React Router
@@ -96,11 +98,14 @@ export default function Sidebar() {
                         </div>
                         {items.map((page) => {
                             const to = URL_MAP[page.pageUrl] || page.pageUrl;
+                            // Require exact match for dashboard (/), and root list pages to prevent sub-routes from highlighting them.
+                            // e.g., `/receipt` shouldn't be active when we are on `/receipt/create`
+                            const exactMatch = to === '/' || to === '/receipt' || to === '/issue' || to === '/inventory';
                             return (
                                 <NavLink
                                     key={page.pageId}
                                     to={to}
-                                    end={to === '/'}
+                                    end={exactMatch}
                                     className={({ isActive }) =>
                                         `flex items-center gap-3 px-3 py-2 rounded-lg text-sm mb-0.5 transition-colors ${isActive
                                             ? 'bg-primary-500 text-white font-medium'
