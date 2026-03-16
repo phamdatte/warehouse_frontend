@@ -102,10 +102,6 @@ export default function LoginPage() {
                             ) : 'Sign In'}
                         </button>
                     </form>
-
-                    <p className="text-xs text-slate-400 text-center mt-6">
-                        Default password: <span className="font-mono">123456</span>
-                    </p>
                 </div>
             </div>
         </div>
