@@ -17,13 +17,15 @@ export default function LoginPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.username || !form.password) {
+        const trimmedUsername = form.username.trim();
+        const trimmedPassword = form.password.trim();
+        if (!trimmedUsername || !trimmedPassword) {
             setError('Please enter your username and password');
             return;
         }
         setLoading(true);
         try {
-            await login(form.username, form.password);
+            await login(trimmedUsername, trimmedPassword);
             toast.success('Login successful!');
             navigate('/', { replace: true });
         } catch (err) {
