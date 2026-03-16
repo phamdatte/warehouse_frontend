@@ -8,6 +8,7 @@ import { PrivateRoute, AdminRoute, PageRoute, GuestRoute } from './router/Guards
 // Pages
 import LoginPage from './pages/auth/LoginPage';
 import MainLayout from './layouts/MainLayout';
+import DashboardPage from './pages/dashboard/DashboardPage';
 
 // Receipt
 import ReceiptListPage from './pages/receipt/ReceiptListPage';
@@ -43,6 +44,7 @@ import PagePermissionPage from './pages/admin/PagePermissionPage';
 
 // Priority order for default redirect
 const MENU_ROUTES = [
+    '/dashboard',
     '/receipt', '/receipt/create',
     '/issue', '/issue/create',
     '/inventory', '/inventory/history',
@@ -54,11 +56,11 @@ const MENU_ROUTES = [
 /** Redirect to the first page the user has canView access to. */
 function SmartRedirect() {
     const { pages, isAdmin } = useAuth();
-    if (isAdmin()) return <Navigate to="/receipt" replace />;
+    if (isAdmin()) return <Navigate to="/dashboard" replace />;
     const first = MENU_ROUTES.find((r) =>
         pages.some((p) => (p.pageUrl || '').replace(/^\//, '') === r.replace(/^\//, '') && p.canView)
     );
-    return <Navigate to={first || '/receipt'} replace />;
+    return <Navigate to={first || '/dashboard'} replace />;
 }
 
 export default function App() {
@@ -75,6 +77,11 @@ export default function App() {
                     <Route element={<PrivateRoute />}>
                         <Route element={<MainLayout />}>
                             <Route index element={<SmartRedirect />} />
+
+                            {/* Dashboard */}
+                            <Route element={<PageRoute group="dashboard" />}>
+                                <Route path="dashboard" element={<DashboardPage />} />
+                            </Route>
 
                             {/* Goods Receipt */}
                             <Route element={<PageRoute group="receipt" />}>
