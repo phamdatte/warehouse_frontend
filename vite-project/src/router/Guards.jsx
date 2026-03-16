@@ -42,7 +42,7 @@ export function PageRoute({ group }) {
     const location = useLocation();
 
     if (!isAuthenticated) return <Navigate to="/login" replace />;
-    if (isAdmin()) return <Outlet />;
+    if (isAdmin() || group === 'dashboard') return <Outlet />;
 
     let allowed = false;
 
