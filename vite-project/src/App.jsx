@@ -57,10 +57,20 @@ const MENU_ROUTES = [
 function SmartRedirect() {
     const { pages, isAdmin } = useAuth();
     if (isAdmin()) return <Navigate to="/dashboard" replace />;
+    
     const first = MENU_ROUTES.find((r) =>
         pages.some((p) => (p.pageUrl || '').replace(/^\//, '') === r.replace(/^\//, '') && p.canView)
     );
-    return <Navigate to={first || '/dashboard'} replace />;
+    
+    if (!first) {
+        return (
+            <div className="flex h-full items-center justify-center text-slate-500">
+                You do not have permission to access any pages. Contact an administrator.
+            </div>
+        );
+    }
+    
+    return <Navigate to={first} replace />;
 }
 
 export default function App() {

@@ -38,27 +38,28 @@ export default function DashboardPage() {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const [receiptRes, issueRes, inventoryRes] = await Promise.all([
+                const [receiptRes, issueRes, inventoryRes, pendingReceiptRes, pendingIssueRes] = await Promise.allSettled([
                     receiptApi.getAll({ size: 5, sort: 'createdAt,desc' }),
                     issueApi.getAll({ size: 5, sort: 'createdAt,desc' }),
                     inventoryApi.getAll({ size: 1 }),
+                    receiptApi.getAll({ status: 'Pending', size: 1 }),
+                    issueApi.getAll({ status: 'Pending', size: 1 })
                 ]);
 
-                // Count pending items by checking the results (or we could make separate API calls if we wanted exact numbers, but for simplicity assuming we get the totals)
-                // Actually to get exact pending we should make a separate call, but let's just make the calls now
-                const pendingReceiptRes = await receiptApi.getAll({ status: 'Pending', size: 1 });
-                const pendingIssueRes = await issueApi.getAll({ status: 'Pending', size: 1 });
+                // Helper to extract data or default
+                const extractData = (res, path, defaultVal) => 
+                    res.status === 'fulfilled' && res.value?.data ? res.value.data[path] : defaultVal;
 
                 setStats({
-                    pendingReceipts: pendingReceiptRes.data?.totalElements || 0,
-                    pendingIssues: pendingIssueRes.data?.totalElements || 0,
-                    inventoryItems: inventoryRes.data?.totalElements || 0,
-                    recentReceipts: receiptRes.data?.content || [],
-                    recentIssues: issueRes.data?.content || [],
+                    recentReceipts: extractData(receiptRes, 'content', []),
+                    recentIssues: extractData(issueRes, 'content', []),
+                    inventoryItems: extractData(inventoryRes, 'totalElements', 0),
+                    pendingReceipts: extractData(pendingReceiptRes, 'totalElements', 0),
+                    pendingIssues: extractData(pendingIssueRes, 'totalElements', 0),
                 });
             } catch (err) {
                 console.error(err);
-                toast.error('Failed to load dashboard data');
+                // Only show toaster if there's a critical non-promise error
             } finally {
                 setLoading(false);
             }
