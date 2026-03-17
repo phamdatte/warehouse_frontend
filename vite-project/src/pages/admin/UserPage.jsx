@@ -32,12 +32,12 @@ function CreateUserModal({ roles, onSave, onClose }) {
                             <input name="fullName" value={form.fullName} onChange={handleChange} className="input" required />
                         </div>
                         <div>
-                            <label className="label">Email</label>
-                            <input name="email" type="email" value={form.email} onChange={handleChange} className="input" />
+                            <label className="label">Email *</label>
+                            <input name="email" type="email" value={form.email} onChange={handleChange} className="input" required />
                         </div>
                         <div>
-                            <label className="label">Phone</label>
-                            <input name="phone" value={form.phone} onChange={handleChange} className="input" />
+                            <label className="label">Phone *</label>
+                            <input name="phone" value={form.phone} onChange={handleChange} className="input" required />
                         </div>
                         <div className="col-span-2">
                             <label className="label">Role</label>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
 import { reportApi } from '../../api/reportApi';
@@ -106,7 +107,14 @@ export default function ReportIssuePage() {
     };
 
     const columns = [
-        { key: 'issueNumber', label: 'Issue No.', width: '130px' },
+        {
+            key: 'issueNumber', label: 'Issue No.', width: '130px',
+            render: (v, row) => (
+                <Link to={`/issue/${row.issueId}`} className="font-semibold text-primary-600 hover:text-primary-800 hover:underline">
+                    {v}
+                </Link>
+            ),
+        },
         { key: 'customerName', label: 'Customer' },
         {
             key: 'issueDate', label: 'Date', width: '120px',

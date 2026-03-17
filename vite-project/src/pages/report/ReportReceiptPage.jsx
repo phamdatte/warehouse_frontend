@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
 import { reportApi } from '../../api/reportApi';
@@ -119,7 +120,14 @@ export default function ReportReceiptPage() {
     };
 
     const columns = [
-        { key: 'receiptNumber', label: 'Receipt No.', width: '130px' },
+        {
+            key: 'receiptNumber', label: 'Receipt No.', width: '130px',
+            render: (v, row) => (
+                <Link to={`/receipt/${row.receiptId}`} className="font-semibold text-primary-600 hover:text-primary-800 hover:underline">
+                    {v}
+                </Link>
+            ),
+        },
         { key: 'vendorName', label: 'Vendor' },
         {
             key: 'receiptDate', label: 'Date', width: '120px',
